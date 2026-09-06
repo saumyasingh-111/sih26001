@@ -13,3 +13,63 @@
 @media (prefers-reduced-motion:reduce){.cinematic-landing *,.cinematic-landing *:before,.cinematic-landing *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}.cinematic-landing .hero-rain{display:none}.landing-reveal{opacity:1;transform:none}}
 @media (max-width: 1050px){.command-center-page{padding:28px 24px 44px}.command-main-grid{grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr)}.command-map-section{min-height:540px}.command-map-shell{min-height:405px}.activity-timeline{grid-template-columns:repeat(2,1fr);gap:20px 0}}
 @media (max-width: 760px){.command-center-page{padding:22px 15px 38px}.operations-header{display:block;padding-bottom:20px}.operations-header h1{font-size:30px}.operations-status{align-items:flex-start;margin-top:22px}.operations-actions{width:100%}.operations-actions .secondary-button{flex:1}.situation-strip{grid-template-columns:repeat(2,1fr);gap:0 15px}.situation-strip span{margin:0;padding:12px 0;border-right:0;border-bottom:1px solid #dce4e2}.situation-strip span:nth-child(odd){border-right:1px solid #dce4e2;padding-right:15px}.situation-strip span:nth-child(3),.situation-strip span:nth-child(4){border-bottom:0}.situation-strip strong{font-size:17px}.command-main-grid,.command-bottom-grid{grid-template-columns:1fr}.command-map-section{min-height:500px}.command-map-shell{min-height:360px}.command-intelligence{min-height:560px}.command-section-head{align-items:flex-start;flex-direction:column}.command-section-head .demo-chip{white-space:normal}.map-caption{display:block;line-height:2}.map-caption>span:last-child{flex-wrap:wrap}.activity-timeline{grid-template-columns:1fr;gap:16px}.activity-timeline>span{min-height:42px}.command-alert-row{grid-template-columns:auto 1fr auto}.command-alert-row>svg{display:none}.command-map-controls{max-width:calc(100% - 28px);overflow-x:auto}.command-map-controls button{white-space:nowrap}.status-popover{left:0;right:auto}}
+
+/* High Legibility Global Contrast Refinement */
+.text-muted, p, .page-heading p, .operations-header p {
+  color: #475569;
+}
+.dark p, .dark .text-muted {
+  color: #cbd5e1;
+}
+
+/* Data Callouts: Bold typography & compact tracking */
+.score-ring strong,
+.intelligence-score strong,
+.incident-hero-score strong,
+.metric strong,
+.prediction-number,
+.trend-current {
+  font-weight: 800 !important;
+  letter-spacing: -0.04em !important;
+  color: #0f172a !important;
+}
+
+/* Crisp form controls on Field Reports & inputs */
+.field-form-grid select,
+.field-form-grid textarea,
+.form-grid select,
+.form-grid textarea,
+.voice-transcript textarea,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  outline: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.field-form-grid select:focus,
+.field-form-grid textarea:focus,
+.form-grid select:focus,
+.form-grid textarea:focus,
+.voice-transcript textarea:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Limit form textareas to max-w-3xl */
+.field-form-grid textarea,
+.form-grid textarea,
+.voice-transcript textarea {
+  max-width: 48rem !important; /* max-w-3xl */
+  width: 100% !important;
+}

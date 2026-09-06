@@ -6,6 +6,29 @@ export type Alert = { id: string; level: RiskLevel; title: string; location: str
 export type FieldReport = { id: string; location: string; incident: string; severity: RiskLevel; timestamp: string; reporter: string; status: string; image?: string; description?: string; ai?: Detection[] }
 export type Detection = { label: string; confidence: number; severity: RiskLevel }
 export type EnvironmentSeries = { labels: string[]; rainfall: number[]; soil: number[]; temperature: number[]; humidity: number[]; risk: number[] }
+export type IncidentTimelineEvent = { id: string; time: string; label: string; detail: string; tone: 'detected' | 'reported' | 'verified' | 'prioritized' | 'approved' | 'assigned' | 'responding' | 'resolved' }
+export type ResponseResource = { id: string; name: string; recommended: number; available: number; assigned: number; unit: string }
+export type SafeRoute = { id: string; name: string; status: 'RECOMMENDED' | 'HIGH RISK' | 'BLOCKED'; distance: string; travelTime: string; risk: string; reason: string }
+export type Incident = {
+  id: string
+  location: string
+  district: string
+  coordinates: [number, number]
+  severity: RiskLevel
+  riskScore: number
+  priorityScore: number
+  confidence: number
+  connectivity: 'CONNECTED' | 'LIMITED' | 'BLACKOUT'
+  lastSignal: string
+  affectedArea: string
+  officerDecision: 'PENDING' | 'APPROVED' | 'MODIFIED' | 'REJECTED'
+  decisionReason?: string
+  responseStatus: 'AWAITING APPROVAL' | 'APPROVED FOR RESPONSE' | 'RESPONDING' | 'RESOLVED'
+  reportId?: string
+  timeline: IncidentTimelineEvent[]
+  resources: ResponseResource[]
+  routes: SafeRoute[]
+}
 
 export const regions: Region[] = [
   { name: 'Churachandpur', state: 'Manipur', risk: 91, rain: '128 mm', soil: 92, slope: 78, historical: 81, satellite: 73, visual: 88, x: 63, y: 55 },
@@ -43,9 +66,52 @@ export const initialReports: FieldReport[] = [
   { id: 'FR-027', location: 'NH-102', incident: 'Ground crack', severity: 'MODERATE', timestamp: '05 Sep 2026, 08:42', reporter: 'M. Devi', status: 'Verified', ai: detections.slice(0, 1) },
 ]
 
+export const initialIncident: Incident = {
+  id: 'SNR-2026-00482',
+  location: 'Tawang, Arunachal Pradesh',
+  district: 'Tawang',
+  coordinates: [27.586, 91.859],
+  severity: 'CRITICAL',
+  riskScore: 87,
+  priorityScore: 92,
+  confidence: 87,
+  connectivity: 'LIMITED',
+  lastSignal: '14 minutes ago',
+  affectedArea: '12.4 km2',
+  officerDecision: 'PENDING',
+  responseStatus: 'AWAITING APPROVAL',
+  timeline: [
+    { id: 'detected', time: '10:15', label: 'Detected', detail: 'Heavy rainfall detected', tone: 'detected' },
+    { id: 'risk', time: '10:42', label: 'Prioritized', detail: 'Risk score increased', tone: 'prioritized' },
+    { id: 'satellite', time: '11:08', label: 'Verified', detail: 'Satellite terrain change detected', tone: 'verified' },
+    { id: 'report', time: '11:23', label: 'Reported', detail: 'Field report submitted', tone: 'reported' },
+    { id: 'cv', time: '11:31', label: 'Verified', detail: 'CV verification completed', tone: 'verified' },
+    { id: 'alert', time: '11:38', label: 'Prioritized', detail: 'Alert classified as CRITICAL', tone: 'prioritized' },
+    { id: 'officer', time: '11:45', label: 'Reported', detail: 'Officer notified', tone: 'reported' },
+    { id: 'plan', time: '11:52', label: 'Detected', detail: 'Response plan generated', tone: 'detected' },
+  ],
+  resources: [
+    { id: 'clearance', name: 'Road clearance unit', recommended: 1, available: 2, assigned: 0, unit: 'unit' },
+    { id: 'field', name: 'Field assessment team', recommended: 2, available: 3, assigned: 0, unit: 'teams' },
+    { id: 'medical', name: 'Medical support', recommended: 1, available: 2, assigned: 0, unit: 'team' },
+    { id: 'police', name: 'Police personnel', recommended: 2, available: 8, assigned: 0, unit: 'personnel' },
+  ],
+  routes: [
+    { id: 'route-a', name: 'Route A', status: 'BLOCKED', distance: '18.2 km', travelTime: 'Unavailable', risk: 'Extreme', reason: 'Active landslide zone blocks NH-13.' },
+    { id: 'route-b', name: 'Route B', status: 'HIGH RISK', distance: '21.7 km', travelTime: '52 min', risk: 'High', reason: 'Passes near a weak connectivity area.' },
+    { id: 'route-c', name: 'Route C', status: 'RECOMMENDED', distance: '25.1 km', travelTime: '44 min', risk: 'Low', reason: 'Avoids the active landslide and blackout area.' },
+  ],
+}
+
 export const sourceNames = ['Rainfall', 'Soil Moisture', 'Terrain', 'Historical Landslides', 'Satellite Imagery', 'Field Reports', 'Computer Vision', 'Weather Forecast']
 
 export function riskLevel(score: number): RiskLevel { return score >= 76 ? 'CRITICAL' : score >= 51 ? 'HIGH' : score >= 31 ? 'MODERATE' : 'LOW' }
+export function priorityLevel(score: number): RiskLevel { return riskLevel(score) }
+export function calculatePriority(severity: RiskLevel, population: number, infrastructure: number, connectivity: Incident['connectivity'], confidence: number): number {
+  const severityWeight = severity === 'CRITICAL' ? 35 : severity === 'HIGH' ? 27 : severity === 'MODERATE' ? 18 : 10
+  const connectivityWeight = connectivity === 'BLACKOUT' ? 10 : connectivity === 'LIMITED' ? 7 : 2
+  return Math.min(100, severityWeight + Math.min(20, population) + Math.min(18, infrastructure) + connectivityWeight + Math.min(9, Math.round(confidence / 10)))
+}
 export function calculateRisk(region: Region, enabled: Record<string, boolean>): number {
   const factors: [string, number, number][] = [['Rainfall', region.risk, 30], ['Soil Moisture', region.soil, 20], ['Terrain', region.slope, 15], ['Historical Landslides', region.historical, 15], ['Satellite Imagery', region.satellite, 10], ['Computer Vision', region.visual, 10]]
   const active = factors.filter(([name]) => enabled[name] !== false)
