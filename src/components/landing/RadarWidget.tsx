@@ -19,7 +19,7 @@ export function RadarWidget() {
       >
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
         <span className="w-2 h-2 -ml-3 rounded-full bg-emerald-400" />
-        <span>● LIVE SENSOR STREAM - Active</span>
+        <span>● LIVE WEATHER SENSOR STREAM - Active</span>
       </motion.div>
 
       {/* Circular Radar Container */}
