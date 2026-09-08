@@ -12,6 +12,7 @@ import {
   Database,
   Download,
   Eye,
+  Flame,
   Info,
   Layers,
   LocateFixed,
@@ -39,6 +40,7 @@ import { RouteName } from '../navbar/TopNav'
 import { useDataContext, EarlyWarningAction } from '../../context/DataContext'
 import { HISTORICAL_LANDSLIDES } from '../../data/historicalLandslides'
 import { CHURACHANDPUR_DEMO_SCENARIO } from '../../data/demoScenario'
+import { generateLandslideHeatmapData, HEATMAP_GRADIENT } from '../../utils/heatmapGenerator'
 
 interface CommandCenterOperationsProps {
   region: Region
@@ -102,6 +104,13 @@ export function CommandCenterOperations({
     connectivity: false,
     routes: true,
   })
+
+  // Heatmap & Basemap configuration
+  const [heatmapEnabled, setHeatmapEnabled] = useState(true)
+  const [heatmapRadius, setHeatmapRadius] = useState(28) // 15px to 50px
+  const [heatmapIntensity, setHeatmapIntensity] = useState(0.85) // 0.2 to 1.0
+  const [activeBasemap, setActiveBasemap] = useState<'dark' | 'satellite' | 'street'>('dark')
+  const [showHeatmapSettings, setShowHeatmapSettings] = useState(false)
 
   // Human-in-the-loop review modal state
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
@@ -289,27 +298,33 @@ export function CommandCenterOperations({
       {/* ============================================================ */}
       {/* 3. System Status & Telemetry Sub-bar                         */}
       {/* ============================================================ */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-3.5 py-2 rounded-lg bg-slate-100/90 border border-slate-200 text-xs font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-3.5 py-2 rounded-lg bg-[#14181c] border border-[#222930] text-xs font-mono shadow-xs">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <span
               className={`w-2 h-2 rounded-full ${
-                activeScore >= 75 ? 'bg-rose-600 animate-ping' : 'bg-emerald-600'
+                activeScore >= 75 ? 'bg-rose-500 animate-ping' : 'bg-emerald-400'
               }`}
             />
-            <span className="font-bold text-slate-900">{systemStatusLabel}</span>
+            <span
+              className={`font-bold tracking-wide ${
+                activeScore >= 75 ? 'text-rose-400' : 'text-emerald-400'
+              }`}
+            >
+              {systemStatusLabel}
+            </span>
           </div>
-          <span className="text-slate-300">|</span>
-          <div className="flex items-center gap-1.5 text-slate-600">
-            <Radio size={13} className="text-slate-500" />
+          <span className="text-stone-600">|</span>
+          <div className="flex items-center gap-1.5 text-stone-300">
+            <Radio size={13} className="text-[#7eb396]" />
             <span>
-              WEATHER FEED: {weatherLoading ? 'Updating Open-Meteo...' : weather.source} ({weather.lastFetched})
+              WEATHER FEED: <span className="text-stone-100 font-semibold">{weatherLoading ? 'Updating Open-Meteo...' : weather.source}</span> <span className="text-stone-400">({weather.lastFetched})</span>
             </span>
           </div>
         </div>
 
         {locationError && !isDemoMode && (
-          <div className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+          <div className="text-[11px] text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/60">
             GPS Notice: {locationError}
           </div>
         )}
@@ -426,47 +441,128 @@ export function CommandCenterOperations({
         {/* LEFT: Leaflet Map with GPS Auto-Centering (7 Columns) */}
         <div className="lg:col-span-7 flex flex-col rounded-lg bg-white border border-slate-200 shadow-2xs overflow-hidden">
           {/* Map Toolbar */}
-          <div className="p-3 bg-slate-50/90 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div className="p-3 bg-[#14181c] border-b border-[#222930] flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-900">Geospatial Tactical Map</span>
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-xs font-bold text-stone-100 font-mono">Geospatial Tactical Map</span>
+              <span className="text-[11px] font-mono text-stone-400">
                 ({activeLocationName})
               </span>
             </div>
 
-            {/* Layer Toggles */}
-            <div className="flex items-center gap-1 flex-wrap text-[10px] font-mono">
-              {(
-                [
-                  { key: 'risk', label: 'RISK' },
-                  { key: 'rainfall', label: 'RAINFALL' },
-                  { key: 'landslides', label: 'LANDSLIDES' },
-                  { key: 'reports', label: 'REPORTS' },
-                  { key: 'roads', label: 'ROADS' },
-                  { key: 'connectivity', label: 'COMMS' },
-                  { key: 'routes', label: 'ROUTES' },
-                ] as const
-              ).map(({ key, label }) => {
-                const isActive = activeLayers[key]
-                return (
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Basemap Selector */}
+              <div className="flex items-center rounded-md bg-[#101418] p-0.5 border border-[#222930] text-[10px] font-mono">
+                {(['dark', 'satellite', 'street'] as const).map((b) => (
                   <button
-                    key={key}
-                    onClick={() => toggleLayer(key)}
-                    className={`px-2 py-0.5 rounded transition-all cursor-pointer font-semibold ${
-                      isActive
-                        ? 'bg-slate-900 text-white shadow-2xs'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    key={b}
+                    onClick={() => setActiveBasemap(b)}
+                    className={`px-1.5 py-0.5 rounded uppercase font-semibold cursor-pointer transition-colors ${
+                      activeBasemap === b
+                        ? 'bg-[#1e2e26] text-[#8ea699] border border-[#2f493c]'
+                        : 'text-stone-400 hover:text-stone-200'
                     }`}
                   >
-                    {label}
+                    {b === 'satellite' ? 'SAT' : b}
                   </button>
-                )
-              })}
+                ))}
+              </div>
+
+              {/* Heatmap Toggle & Config */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setHeatmapEnabled(!heatmapEnabled)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 border ${
+                    heatmapEnabled
+                      ? 'bg-rose-950/80 text-rose-300 border-rose-800 shadow-2xs'
+                      : 'bg-[#182026] text-stone-400 border-[#26313b] hover:text-stone-200'
+                  }`}
+                  title="Toggle Continuous Landslide Risk Heatmap"
+                >
+                  <Flame size={11} className={heatmapEnabled ? 'text-rose-400 animate-pulse' : 'text-stone-500'} />
+                  <span>HEATMAP</span>
+                </button>
+                <button
+                  onClick={() => setShowHeatmapSettings(!showHeatmapSettings)}
+                  className={`p-1 rounded text-[10px] cursor-pointer border transition-colors ${
+                    showHeatmapSettings
+                      ? 'bg-[#1e2e26] text-emerald-300 border-emerald-700'
+                      : 'bg-[#182026] text-stone-400 border-[#26313b] hover:text-stone-200'
+                  }`}
+                  title="Configure Heatmap Spread Radius & Opacity Threshold"
+                >
+                  <Sliders size={11} />
+                </button>
+              </div>
+
+              {/* Layer Toggles */}
+              <div className="flex items-center gap-1 flex-wrap text-[10px] font-mono">
+                {(
+                  [
+                    { key: 'rainfall', label: 'RAIN' },
+                    { key: 'roads', label: 'ROADS' },
+                    { key: 'connectivity', label: 'COMMS' },
+                    { key: 'routes', label: 'ROUTES' },
+                  ] as const
+                ).map(({ key, label }) => {
+                  const isActive = activeLayers[key]
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => toggleLayer(key)}
+                      className={`px-1.5 py-0.5 rounded transition-all cursor-pointer font-semibold border ${
+                        isActive
+                          ? 'bg-[#1a232b] text-stone-100 border-[#32404e] shadow-2xs'
+                          : 'bg-[#14181c] text-stone-400 border-[#222930] hover:bg-[#1a2229]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
+          {/* Heatmap Tuning Drawer (Interactive Sliders) */}
+          {showHeatmapSettings && (
+            <div className="px-3.5 py-2.5 bg-[#101418] border-b border-[#222930] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+              <div className="space-y-1">
+                <div className="flex justify-between text-stone-300 text-[10px]">
+                  <span>Heatmap Spread Radius:</span>
+                  <span className="text-[#8ea699] font-bold">{heatmapRadius}px</span>
+                </div>
+                <input
+                  type="range"
+                  min={15}
+                  max={50}
+                  step={1}
+                  value={heatmapRadius}
+                  disabled={!heatmapEnabled}
+                  onChange={(e) => setHeatmapRadius(Number(e.target.value))}
+                  className="w-full accent-emerald-500 cursor-pointer disabled:opacity-35"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-stone-300 text-[10px]">
+                  <span>Intensity Threshold:</span>
+                  <span className="text-[#dca24c] font-bold">{Math.round(heatmapIntensity * 100)}% ({heatmapIntensity.toFixed(2)})</span>
+                </div>
+                <input
+                  type="range"
+                  min={0.2}
+                  max={1.0}
+                  step={0.05}
+                  value={heatmapIntensity}
+                  disabled={!heatmapEnabled}
+                  onChange={(e) => setHeatmapIntensity(Number(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer disabled:opacity-35"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Leaflet Map Surface */}
-          <div className="relative h-[480px] bg-slate-100">
+          <div className="relative h-[480px] bg-slate-950">
             <CommandMapLeaflet
               activeCoords={activeLocationCoords}
               locationName={activeLocationName}
@@ -478,20 +574,24 @@ export function CommandCenterOperations({
               activeLayers={activeLayers}
               onSelectDistrict={(districtName) => setActiveDistrict(districtName)}
               connectivityZones={connectivityZones}
+              heatmapEnabled={heatmapEnabled}
+              heatmapRadius={heatmapRadius}
+              heatmapIntensity={heatmapIntensity}
+              activeBasemap={activeBasemap}
             />
 
             {/* Floating Map Controls */}
             <div className="absolute top-3 right-3 z-400 flex flex-col gap-1">
               <button
                 onClick={() => go('gis')}
-                className="w-7 h-7 rounded bg-white border border-slate-300 shadow-xs flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-50 cursor-pointer"
+                className="w-7 h-7 rounded bg-[#14181c] border border-[#2b3742] shadow-xs flex items-center justify-center text-stone-300 hover:text-stone-100 hover:bg-[#1a2229] cursor-pointer"
                 title="Open Full GIS Workstation"
               >
                 <Maximize2 size={13} />
               </button>
               <button
                 onClick={refreshWeather}
-                className="w-7 h-7 rounded bg-white border border-slate-300 shadow-xs flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-50 cursor-pointer"
+                className="w-7 h-7 rounded bg-[#14181c] border border-[#2b3742] shadow-xs flex items-center justify-center text-stone-300 hover:text-stone-100 hover:bg-[#1a2229] cursor-pointer"
                 title="Refresh Live Weather"
               >
                 <RefreshCw size={13} className={weatherLoading ? 'animate-spin' : ''} />
@@ -500,17 +600,18 @@ export function CommandCenterOperations({
           </div>
 
           {/* Map Footer Legend */}
-          <div className="p-2.5 bg-slate-50/80 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-500 font-mono text-[11px]">
-            <span>Map automatically centered on monitored coordinates.</span>
+          <div className="p-2.5 bg-[#14181c] border-t border-[#222930] flex flex-wrap items-center justify-between text-xs text-stone-400 font-mono text-[11px] gap-2">
+            <div className="flex items-center gap-2">
+              <span>Heatmap Gradient:</span>
+              <div className="h-2 w-28 rounded-full bg-gradient-to-r from-[#00ff00] via-[#ffff00] via-[#ff0000] to-[#b91c1c] border border-black/30" />
+              <span className="text-[10px] text-stone-400">Green (Low) → Red (Critical)</span>
+            </div>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block" /> Critical (≥76%)
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> High (51-75%)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block" /> Elevated (31-50%)
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" /> Normal (≤30%)
@@ -1118,6 +1219,10 @@ function CommandMapLeaflet({
   activeLayers,
   onSelectDistrict,
   connectivityZones,
+  heatmapEnabled = true,
+  heatmapRadius = 28,
+  heatmapIntensity = 0.85,
+  activeBasemap = 'dark',
 }: {
   activeCoords: { lat: number; lon: number }
   locationName: string
@@ -1129,10 +1234,36 @@ function CommandMapLeaflet({
   activeLayers: Record<LayerKey, boolean>
   onSelectDistrict: (name: string) => void
   connectivityZones: any[]
+  heatmapEnabled?: boolean
+  heatmapRadius?: number
+  heatmapIntensity?: number
+  activeBasemap?: 'dark' | 'satellite' | 'street'
 }) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
+  const tileLayerRef = useRef<L.TileLayer | null>(null)
   const overlayGroupRef = useRef<L.LayerGroup | null>(null)
+  const heatLayerRef = useRef<any>(null)
+
+  const BASEMAP_URLS = {
+    dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  }
+
+  // Handle dynamic basemap layer switching
+  useEffect(() => {
+    if (!mapInstance.current) return
+    if (tileLayerRef.current) {
+      try {
+        mapInstance.current.removeLayer(tileLayerRef.current)
+      } catch {
+        // ignore
+      }
+    }
+    const tileUrl = BASEMAP_URLS[activeBasemap] || BASEMAP_URLS.dark
+    tileLayerRef.current = L.tileLayer(tileUrl, { maxZoom: 18 }).addTo(mapInstance.current)
+  }, [activeBasemap])
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
@@ -1143,7 +1274,8 @@ function CommandMapLeaflet({
       attributionControl: false,
     }).setView(initialCenter, isDemoMode ? 9 : 10)
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileUrl = BASEMAP_URLS[activeBasemap] || BASEMAP_URLS.dark
+    tileLayerRef.current = L.tileLayer(tileUrl, {
       maxZoom: 18,
     }).addTo(map)
 
@@ -1152,6 +1284,14 @@ function CommandMapLeaflet({
     mapInstance.current = map
 
     return () => {
+      if (heatLayerRef.current && mapInstance.current) {
+        try {
+          mapInstance.current.removeLayer(heatLayerRef.current)
+        } catch {
+          // ignore
+        }
+        heatLayerRef.current = null
+      }
       map.remove()
       mapInstance.current = null
     }
@@ -1172,23 +1312,19 @@ function CommandMapLeaflet({
 
     overlayGroup.clearLayers()
 
-    // 0. High-Visibility Device Location GPS Beacon
-    const gpsBeacon = L.circleMarker([activeCoords.lat, activeCoords.lon], {
-      radius: 10,
-      color: isDemoMode ? '#dc2626' : '#059669',
-      fillColor: isDemoMode ? '#ef4444' : '#10b981',
-      fillOpacity: 0.9,
-      weight: 3,
+    // 0. High-Visibility Device Location GPS Beacon (Sleek pulse pin - no raw circles)
+    const pinHtml = `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;inset:0;border-radius:50%;background:${isDemoMode ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)'};animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>
+      <div style="width:12px;height:12px;border-radius:50%;background:${isDemoMode ? '#ef4444' : '#10b981'};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.5);"></div>
+    </div>`
+    const gpsBeacon = L.marker([activeCoords.lat, activeCoords.lon], {
+      icon: L.divIcon({
+        className: 'command-gps-beacon-pin',
+        html: pinHtml,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      }),
     })
-
-    const radarPulse = L.circle([activeCoords.lat, activeCoords.lon], {
-      radius: isDemoMode ? 6000 : 3000,
-      color: isDemoMode ? '#ef4444' : '#10b981',
-      fillColor: isDemoMode ? '#ef4444' : '#10b981',
-      fillOpacity: 0.15,
-      weight: 1.5,
-    })
-    radarPulse.addTo(overlayGroup)
 
     gpsBeacon.bindTooltip(
       `<div style="font-family:sans-serif;font-size:11px;line-height:1.4;">
@@ -1203,71 +1339,52 @@ function CommandMapLeaflet({
     )
     gpsBeacon.addTo(overlayGroup)
 
-    // 1. Regional Risk Nodes
-    if (activeLayers.risk) {
-      regions.forEach((item) => {
-        const isSelected = item.name === 'Churachandpur' && isDemoMode
-        const currentRisk = isSelected ? 94 : item.risk
-        const color =
-          currentRisk >= 76 ? '#e11d48' : currentRisk >= 51 ? '#f97316' : currentRisk >= 31 ? '#eab308' : '#16a34a'
+    // 1. Continuous Weighted Landslide Risk & Hazard Density Heatmap Layer
+    if (mapInstance.current) {
+      if (heatLayerRef.current) {
+        try {
+          mapInstance.current.removeLayer(heatLayerRef.current)
+        } catch {
+          // ignore
+        }
+        heatLayerRef.current = null
+      }
 
-        const circle = L.circle([26.2 + (item.y - 50) * 0.12, 92.94 + (item.x - 50) * 0.16], {
-          radius: Math.max(8000, currentRisk * 420),
-          color,
-          fillColor: color,
-          fillOpacity: isSelected ? 0.35 : 0.18,
-          weight: isSelected ? 3 : 1.5,
+      if (heatmapEnabled && (isDemoMode || activeLayers.risk)) {
+        const heatmapPoints = generateLandslideHeatmapData({
+          isDemoMode,
+          activeScore: liveRiskScore,
+          selectedDistrict: locationName,
+          includeHistorical: activeLayers.landslides,
         })
 
-        circle.bindTooltip(
-          `<div style="font-family:sans-serif;font-size:11px;">
-            <strong>${item.name}</strong> (${item.state})<br/>
-            Risk Score: <b>${currentRisk}%</b> (${riskLevel(currentRisk)})<br/>
-            Rainfall: ${item.rain}
-          </div>`,
-          { direction: 'top' }
-        )
-
-        circle.on('click', () => {
-          onSelectDistrict(item.name)
-        })
-
-        circle.addTo(overlayGroup)
-      })
+        try {
+          const heat = (L as any).heatLayer(heatmapPoints, {
+            radius: heatmapRadius,
+            blur: 18,
+            max: heatmapIntensity,
+            minOpacity: 0.35,
+            gradient: HEATMAP_GRADIENT,
+          })
+          heat.addTo(mapInstance.current)
+          heatLayerRef.current = heat
+        } catch (e) {
+          console.error('Heatmap instantiation error in Command Center:', e)
+        }
+      }
     }
 
-    // 2. NASA GLC Historical Landslide Points
-    if (activeLayers.landslides) {
-      HISTORICAL_LANDSLIDES.forEach((event) => {
-        const marker = L.circleMarker(event.coordinates, {
-          radius: 6,
-          color: '#475569',
-          fillColor: '#64748b',
-          fillOpacity: 0.85,
-          weight: 1.5,
-        })
-        marker.bindTooltip(
-          `<div style="font-family:sans-serif;font-size:11px;max-width:220px;">
-            <strong style="color:#0f172a;">NASA GLC RECORD (${event.date.slice(0, 4)})</strong><br/>
-            <b>${event.location}</b><br/>
-            Trigger: ${event.trigger}<br/>
-            Rainfall: ${event.rainfall24hMm}mm | Fatalities: ${event.fatalities}<br/>
-            <i>${event.source}</i>
-          </div>`,
-          { direction: 'top' }
-        )
-        marker.addTo(overlayGroup)
-      })
-    }
-
-    // 3. Roads & Blockages Layer
+    // 2. Roads & Blockages Layer (Sleek badge pin - no raw circles)
     if (activeLayers.roads) {
-      const blockageMarker = L.circleMarker([24.352, 93.688], {
-        radius: 8,
-        color: '#991b1b',
-        fillColor: '#dc2626',
-        fillOpacity: 0.9,
-        weight: 2,
+      const blockageMarker = L.marker([24.352, 93.688], {
+        icon: L.divIcon({
+          className: 'command-road-blockage-pin',
+          html: `<div style="background:#dc2626;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;font-family:sans-serif;border:1.5px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.6);display:flex;align-items:center;gap:3px;white-space:nowrap;">
+            <span>⛔</span><span>BLOCKAGE</span>
+          </div>`,
+          iconSize: [85, 22],
+          iconAnchor: [42, 11],
+        }),
       })
       blockageMarker.bindTooltip(
         `<div style="font-family:sans-serif;font-size:11px;">
@@ -1350,6 +1467,9 @@ function CommandMapLeaflet({
     weather,
     onSelectDistrict,
     connectivityZones,
+    heatmapEnabled,
+    heatmapRadius,
+    heatmapIntensity,
   ])
 
   return <div ref={mapRef} className="w-full h-full" />

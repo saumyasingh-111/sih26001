@@ -48,7 +48,7 @@ interface TopNavProps {
   setSearch: (s: string) => void
 }
 
-// 4 Primary Center Navigation Tabs
+// Primary Center Navigation Tabs
 const PRIMARY_NAV = [
   { label: 'Command Center', icon: Crosshair, route: 'command-center' as RouteName },
   { label: 'Risk Intelligence', icon: BrainCircuit, route: 'risk-intelligence' as RouteName },

@@ -272,7 +272,11 @@ button { border: 0; cursor: pointer; }
 .app-shell .bg-gray-50,
 .app-shell .bg-slate-100,
 .app-shell .bg-stone-100,
-.app-shell .bg-gray-100 {
+.app-shell .bg-gray-100,
+.app-shell [class*="bg-slate-100"],
+.app-shell [class*="bg-slate-50"],
+.app-shell [class*="bg-stone-100"],
+.app-shell [class*="bg-stone-50"] {
   background-color: #181f25 !important;
   border-color: #222930 !important;
 }

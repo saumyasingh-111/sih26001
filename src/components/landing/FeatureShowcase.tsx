@@ -5,8 +5,8 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
+  BrainCircuit,
   Crosshair,
-  Layers3,
   Maximize2,
   Mic,
   ShieldAlert,
@@ -19,7 +19,7 @@ interface FeatureShowcaseProps {
   go: (r: RouteName) => void
 }
 
-type FeatureTab = 'Command Center' | 'GIS Layers' | 'Demo Mode' | 'Analytics'
+type FeatureTab = 'Command Center' | 'Risk Intelligence' | 'Demo Mode' | 'Analytics'
 
 export function FeatureShowcase({ go }: FeatureShowcaseProps) {
   const [activeTab, setActiveTab] = useState<FeatureTab>('Command Center')
@@ -27,7 +27,7 @@ export function FeatureShowcase({ go }: FeatureShowcaseProps) {
 
   const tabs: { id: FeatureTab; icon: React.ComponentType<{ size?: number; className?: string }>; route: RouteName }[] = [
     { id: 'Command Center', icon: Crosshair, route: 'command-center' },
-    { id: 'GIS Layers', icon: Layers3, route: 'gis' },
+    { id: 'Risk Intelligence', icon: BrainCircuit, route: 'risk-intelligence' },
     { id: 'Demo Mode', icon: Zap, route: 'command-center' },
     { id: 'Analytics', icon: BarChart3, route: 'analytics' },
   ]
@@ -56,16 +56,16 @@ export function FeatureShowcase({ go }: FeatureShowcaseProps) {
       stat3: { label: 'LATENCY', value: '<120s' },
       actionLabel: 'Launch Command Center',
     },
-    'GIS Layers': {
-      title: 'Deep Geospatial Workstation',
-      subtitle: 'Interactive multi-tier GIS analysis on high-precision terrain maps.',
-      badge: '11 SPATIAL LAYERS',
+    'Risk Intelligence': {
+      title: 'Explainable AI Risk Modeling',
+      subtitle: 'Transparent factor attribution and physics-informed slope diagnostics.',
+      badge: 'FACTOR DECOMPOSITION',
       description:
-        'Overlay environmental datasets (Rainfall, Soil Saturation, Slope), infrastructure routes, and field team beacons with dynamic opacity control.',
-      stat1: { label: 'LAYERS ACTIVE', value: '7 / 11' },
-      stat2: { label: 'BASEMAPS', value: '4 Available' },
-      stat3: { label: 'FORMATS', value: 'GeoJSON / KML' },
-      actionLabel: 'Open GIS Workstation',
+        'Deconstruct multi-variable risk scores into precipitation saturation, slope gradient, geology, and structural displacement with SHAP-level explainability.',
+      stat1: { label: 'CONFIDENCE', value: '94.2%' },
+      stat2: { label: 'FACTORS', value: '7 Tracked' },
+      stat3: { label: 'REFRESH', value: '10-Min Live' },
+      actionLabel: 'Launch Risk Intelligence',
     },
     'Demo Mode': {
       title: 'Interactive Disaster Simulation Engine',
@@ -99,8 +99,8 @@ export function FeatureShowcase({ go }: FeatureShowcaseProps) {
       go('command-center')
     } else if (activeTab === 'Command Center') {
       go('command-center')
-    } else if (activeTab === 'GIS Layers') {
-      go('gis')
+    } else if (activeTab === 'Risk Intelligence') {
+      go('risk-intelligence')
     } else {
       go('analytics')
     }
@@ -270,25 +270,25 @@ export function FeatureShowcase({ go }: FeatureShowcaseProps) {
                       </div>
                     )}
 
-                    {activeTab === 'GIS Layers' && (
+                    {activeTab === 'Risk Intelligence' && (
                       <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-2">
                           <div className="p-2.5 rounded-lg bg-slate-800 border border-emerald-500/40 text-xs">
-                            <span className="text-emerald-400 font-mono">✓ Precipitation</span>
+                            <span className="text-emerald-400 font-mono">✓ Precipitation Spikes</span>
                             <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-                              <div className="bg-emerald-500 h-full w-[80%]" />
+                              <div className="bg-emerald-500 h-full w-[85%]" />
                             </div>
                           </div>
                           <div className="p-2.5 rounded-lg bg-slate-800 border border-emerald-500/40 text-xs">
-                            <span className="text-emerald-400 font-mono">✓ Soil Moisture</span>
+                            <span className="text-emerald-400 font-mono">✓ Slope Gradient &gt; 42°</span>
                             <div className="w-full bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-                              <div className="bg-emerald-500 h-full w-[70%]" />
+                              <div className="bg-amber-500 h-full w-[72%]" />
                             </div>
                           </div>
                         </div>
                         <div className="p-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-xs flex items-center justify-between">
-                          <span className="text-slate-300 font-mono">Evacuation Corridor NH-102</span>
-                          <span className="text-emerald-400 text-[10px] font-mono">CLEAR</span>
+                          <span className="text-slate-300 font-mono">Explainable AI Attribution (SHAP)</span>
+                          <span className="text-emerald-400 text-[10px] font-mono">94.2% CONFIDENCE</span>
                         </div>
                       </div>
                     )}

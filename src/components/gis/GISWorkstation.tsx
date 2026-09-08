@@ -8,6 +8,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Flame,
   Globe2,
   Layers3,
   LocateFixed,
@@ -28,6 +29,7 @@ import { useDataContext } from '../../context/DataContext'
 import { historicalBaselines } from '../../services/dataEngine'
 import { HISTORICAL_LANDSLIDES } from '../../data/historicalLandslides'
 import { DISTRICT_COORDINATES } from '../../services/weatherService'
+import { generateLandslideHeatmapData, HEATMAP_GRADIENT } from '../../utils/heatmapGenerator'
 
 interface GISWorkstationProps {
   region: Region
@@ -94,6 +96,12 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     lng: 93.674,
   })
   const [shelfExpanded, setShelfExpanded] = useState(true)
+
+  // Landslide Risk & Hazard Density Heatmap Layer
+  const [heatmapEnabled, setHeatmapEnabled] = useState(true)
+  const [heatmapRadius, setHeatmapRadius] = useState(28) // 15px to 50px
+  const [heatmapIntensity, setHeatmapIntensity] = useState(0.85) // 0.2 to 1.0 (opacity / threshold)
+  const heatLayerRef = useRef<any>(null)
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
@@ -182,6 +190,14 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     })
 
     return () => {
+      if (heatLayerRef.current && mapInstance.current) {
+        try {
+          mapInstance.current.removeLayer(heatLayerRef.current)
+        } catch {
+          // ignore
+        }
+        heatLayerRef.current = null
+      }
       map.remove()
       mapInstance.current = null
     }
@@ -215,23 +231,19 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
     overlayGroup.clearLayers()
 
-    // 0. High-Visibility User GPS Beacon
-    const userBeacon = L.circleMarker([activeLocationCoords.lat, activeLocationCoords.lon], {
-      radius: 9,
-      color: isDemoMode ? '#dc2626' : '#059669',
-      fillColor: isDemoMode ? '#ef4444' : '#10b981',
-      fillOpacity: 0.95,
-      weight: 3,
+    // 0. High-Visibility User GPS Beacon (Sleek pulse pin - no raw circles)
+    const pinHtml = `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;inset:0;border-radius:50%;background:${isDemoMode ? 'rgba(239,68,68,0.35)' : 'rgba(16,185,129,0.35)'};animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>
+      <div style="width:12px;height:12px;border-radius:50%;background:${isDemoMode ? '#ef4444' : '#10b981'};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.5);"></div>
+    </div>`
+    const userBeacon = L.marker([activeLocationCoords.lat, activeLocationCoords.lon], {
+      icon: L.divIcon({
+        className: 'user-gps-beacon-pin',
+        html: pinHtml,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      }),
     })
-
-    const pulseRing = L.circle([activeLocationCoords.lat, activeLocationCoords.lon], {
-      radius: isDemoMode ? 5000 : 2500,
-      color: isDemoMode ? '#ef4444' : '#10b981',
-      fillColor: isDemoMode ? '#ef4444' : '#10b981',
-      fillOpacity: 0.15,
-      weight: 1.5,
-    })
-    pulseRing.addTo(overlayGroup)
 
     userBeacon.bindTooltip(
       `<div style="font-family:inherit;font-size:11px;line-height:1.4;">
@@ -246,58 +258,39 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     )
     userBeacon.addTo(overlayGroup)
 
-    // 1. Regional Risk Nodes (Historical Landslides / Regional Centers) - Only active in Demo or when in NER
-    if (layers['Historical Landslides (ISRO)'] > 0 && (isDemoMode || isNER)) {
-      const opacity = layers['Historical Landslides (ISRO)'] / 100
-      // Regional susceptibility circles
-      regions.forEach((r) => {
-        const isFocus = r.name === region.name
-        const effectiveScore = isDemoMode && r.name === 'Churachandpur' ? 94 : isFocus ? score : r.risk
-        const color =
-          effectiveScore >= 76 ? '#ef4444' : effectiveScore >= 51 ? '#f59e0b' : '#10b981'
+    // 1. Continuous Weighted Landslide Risk & Hazard Density Heatmap Layer
+    if (mapInstance.current) {
+      if (heatLayerRef.current) {
+        try {
+          mapInstance.current.removeLayer(heatLayerRef.current)
+        } catch {
+          // ignore
+        }
+        heatLayerRef.current = null
+      }
 
-        const baseline = historicalBaselines[r.name] || historicalBaselines['Churachandpur']
-        const circle = L.circle([26.2 + (r.y - 50) * 0.12, 92.94 + (r.x - 50) * 0.16], {
-          radius: Math.max(7000, effectiveScore * 400),
-          color,
-          fillColor: color,
-          fillOpacity: opacity * (isFocus ? 0.4 : 0.2),
-          weight: isFocus ? 3 : 1,
+      if (heatmapEnabled && (isDemoMode || isNER)) {
+        const heatmapPoints = generateLandslideHeatmapData({
+          isDemoMode,
+          activeScore: score,
+          selectedDistrict: region.name,
+          includeHistorical: true,
         })
-        circle.bindTooltip(
-          `<div style="font-family:inherit;font-size:11px;">
-            <strong>${r.name}</strong> (${r.state})<br/>
-            ${effectiveScore}% Risk · Susceptibility: ${baseline.susceptibilityIndex}%<br/>
-            ISRO Bhuvan: ${baseline.bhuvanHazardZone}
-          </div>`,
-          { direction: 'top' }
-        )
-        circle.addTo(overlayGroup)
-      })
 
-      // Verified Historical Landslide Records (NASA GLC & GSI)
-      const eventsToPlot = historicalLandslides && historicalLandslides.length > 0 ? historicalLandslides : HISTORICAL_LANDSLIDES
-      eventsToPlot.forEach((ev) => {
-        const markerColor = ev.severity === 'CRITICAL' ? '#dc2626' : ev.severity === 'HIGH' ? '#ea580c' : '#d97706'
-        const marker = L.circleMarker(ev.coordinates, {
-          radius: ev.severity === 'CRITICAL' ? 7 : 5,
-          color: '#ffffff',
-          fillColor: markerColor,
-          fillOpacity: opacity * 0.9,
-          weight: 1.5,
-        })
-        marker.bindTooltip(
-          `<div style="font-family:inherit;font-size:11px;max-width:240px;">
-            <span style="display:inline-block;padding:1px 5px;border-radius:3px;background:${markerColor};color:white;font-size:9px;font-weight:bold;">${ev.severity} LANDSLIDE</span>
-            <div style="font-weight:bold;margin-top:2px;">${ev.location}</div>
-            <div style="color:#64748b;font-size:10px;">${ev.date} · ${ev.trigger}</div>
-            <div style="margin-top:2px;">24h Rain: <strong>${ev.rainfall24hMm} mm</strong> · Fatalities: ${ev.fatalities}</div>
-            <div style="font-size:10px;color:#059669;margin-top:1px;">${ev.source}</div>
-          </div>`,
-          { direction: 'top' }
-        )
-        marker.addTo(overlayGroup)
-      })
+        try {
+          const heat = (L as any).heatLayer(heatmapPoints, {
+            radius: heatmapRadius,
+            blur: 18,
+            max: heatmapIntensity,
+            minOpacity: 0.35,
+            gradient: HEATMAP_GRADIENT,
+          })
+          heat.addTo(mapInstance.current)
+          heatLayerRef.current = heat
+        } catch (e) {
+          console.error('Heatmap instantiation error:', e)
+        }
+      }
     }
 
     // 2. Buffer Radius Selector Tool
@@ -343,15 +336,18 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
       })
     }
 
-    // 4. Road Blockage Markers
+    // 4. Road Blockage Warning Pins (Sleek badge pin - no raw circles)
     if (layers['Road Blockages'] > 0 && isDemoMode) {
       roadBlockages.forEach((blockage: any) => {
-        const marker = L.circleMarker(blockage.coordinates, {
-          radius: 9,
-          color: '#991b1b',
-          fillColor: '#ef4444',
-          fillOpacity: 0.95,
-          weight: 2,
+        const marker = L.marker(blockage.coordinates, {
+          icon: L.divIcon({
+            className: 'road-blockage-pin',
+            html: `<div style="background:#dc2626;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;font-family:sans-serif;border:1.5px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.6);display:flex;align-items:center;gap:3px;white-space:nowrap;">
+              <span>⛔</span><span>BLOCKAGE</span>
+            </div>`,
+            iconSize: [85, 22],
+            iconAnchor: [42, 11],
+          }),
         })
         marker.bindTooltip(
           `<div style="font-family:inherit;font-size:11px;">
@@ -430,6 +426,9 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     dispatchRoutes,
     connectivityZones,
     historicalLandslides,
+    heatmapEnabled,
+    heatmapRadius,
+    heatmapIntensity,
   ])
 
   // Toggle Accordion Category
@@ -550,6 +549,76 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
       <div className="flex-1 flex overflow-hidden relative">
         {/* Left Control Panel: 300px Fixed Sidebar */}
         <aside className="w-[300px] flex-shrink-0 bg-[#101417] border-r border-[#222930] flex flex-col h-full z-20 overflow-y-auto">
+          {/* ============================================================ */}
+          {/* Landslide Risk & Hazard Density Heatmap Customization        */}
+          {/* ============================================================ */}
+          <div className="p-4 border-b border-[#222930] bg-[#12171b]/90 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#8ea699] uppercase tracking-wide">
+                <Flame size={14} className={heatmapEnabled ? 'text-rose-500 animate-pulse' : 'text-stone-500'} />
+                <span>Hazard Heatmap</span>
+              </div>
+              {/* Heatmap Layer Toggle: [ ON / OFF ] */}
+              <button
+                onClick={() => setHeatmapEnabled(!heatmapEnabled)}
+                className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                  heatmapEnabled
+                    ? 'bg-rose-950/70 text-rose-300 border-rose-800 shadow-xs'
+                    : 'bg-[#182026] text-stone-400 border-[#2a3744] hover:text-stone-200'
+                }`}
+              >
+                {heatmapEnabled ? 'LAYER ON' : 'LAYER OFF'}
+              </button>
+            </div>
+
+            {/* Gradient Visual Indicator (Green -> Yellow -> Red -> Dark Red) */}
+            <div className="space-y-1">
+              <div className="h-2 w-full rounded-full bg-gradient-to-r from-[#00ff00] via-[#ffff00] via-[#ff0000] to-[#b91c1c] opacity-90 border border-black/30" />
+              <div className="flex justify-between text-[9px] font-mono text-stone-400">
+                <span>0.2 (Low)</span>
+                <span>0.5 (Mod)</span>
+                <span>0.8 (High)</span>
+                <span>1.0 (Core)</span>
+              </div>
+            </div>
+
+            {/* Radius Slider: Range control (15px to 50px) */}
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+                <span>Spread Radius:</span>
+                <span className="text-[#8ea699] font-bold">{heatmapRadius} px</span>
+              </div>
+              <input
+                type="range"
+                min={15}
+                max={50}
+                step={1}
+                value={heatmapRadius}
+                disabled={!heatmapEnabled}
+                onChange={(e) => setHeatmapRadius(Number(e.target.value))}
+                className="w-full accent-emerald-500 cursor-pointer disabled:opacity-35"
+              />
+            </div>
+
+            {/* Opacity / Intensity Threshold: Range control (0.2 to 1.0) */}
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+                <span>Intensity Threshold:</span>
+                <span className="text-[#dca24c] font-bold">{Math.round(heatmapIntensity * 100)}% ({heatmapIntensity.toFixed(2)})</span>
+              </div>
+              <input
+                type="range"
+                min={0.2}
+                max={1.0}
+                step={0.05}
+                value={heatmapIntensity}
+                disabled={!heatmapEnabled}
+                onChange={(e) => setHeatmapIntensity(Number(e.target.value))}
+                className="w-full accent-amber-500 cursor-pointer disabled:opacity-35"
+              />
+            </div>
+          </div>
+
           {/* Spatial Filters Section */}
           <div className="p-4 border-b border-[#222930] space-y-3">
             <div className="flex items-center justify-between text-xs font-mono font-semibold text-[#8ea699] uppercase">
