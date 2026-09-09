@@ -130,12 +130,12 @@ function Response({region,score,incident,setIncident,notify}:any){
           title={<>Response <span>Planning</span></>}
           description="AI recommendations remain advisory. An authorized disaster officer makes the final response decision."
         />
-        <div className="panel p-8 text-center space-y-3 bg-[#12161a] border border-[#222930] rounded-lg">
-          <div className="w-12 h-12 rounded-full bg-[#192720] text-[#7eb396] border border-[#294235] flex items-center justify-center mx-auto">
+        <div className="panel p-8 text-center space-y-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto">
             <ShieldCheck size={24} />
           </div>
-          <h2 className="text-lg font-bold text-stone-100 font-mono">NO ACTIVE RESPONSE OPERATIONS</h2>
-          <p className="text-xs text-stone-400 max-w-lg mx-auto leading-relaxed">
+          <h2 className="text-lg font-bold text-slate-900 font-mono">NO ACTIVE RESPONSE OPERATIONS</h2>
+          <p className="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed">
             Live telemetry indicates current sector ({userLocation?.displayName || 'Active Sector'}) is within nominal safety envelopes. No emergency evacuation or multi-unit response operations have been triggered.
           </p>
           <div className="pt-2 flex items-center justify-center gap-3">

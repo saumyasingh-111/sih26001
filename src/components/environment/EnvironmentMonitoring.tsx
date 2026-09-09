@@ -410,7 +410,7 @@ export function EnvironmentMonitoring({
             className="absolute left-0 right-0 border-t border-dashed border-[#c28b38]/50 z-10 flex items-center justify-end pr-2"
             style={{ bottom: '60%' }}
           >
-            <span className="text-[10px] font-mono text-[#dca24c] bg-[#1d1610] px-1.5 py-0.5 rounded border border-[#3e2c1a]">
+            <span className="text-[10px] font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-300">
               EARLY WARNING THRESHOLD (60%)
             </span>
           </div>
@@ -426,16 +426,16 @@ export function EnvironmentMonitoring({
                   className="flex-1 flex flex-col items-center justify-end h-full group relative"
                 >
                   {/* Tooltip on hover */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 z-20 pointer-events-none bg-[#14181c] text-[#f2f0eb] text-[10px] font-mono p-1.5 rounded shadow-xl whitespace-nowrap border border-[#28333c]">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 z-20 pointer-events-none bg-slate-900 text-white text-[10px] font-mono p-1.5 rounded shadow-xl whitespace-nowrap border border-slate-700">
                     <div>Time: {series.labels[idx]}</div>
-                    <div className="text-[#8ea699]">Rain: {rainVal} mm</div>
-                    <div className="text-[#d97c72]">Risk: {riskVal}%</div>
-                    <div className="text-[#6494aa]">Soil: {series.soil[idx]}%</div>
+                    <div className="text-emerald-400">Rain: {rainVal} mm</div>
+                    <div className="text-rose-400">Risk: {riskVal}%</div>
+                    <div className="text-sky-400">Soil: {series.soil[idx]}%</div>
                   </div>
 
                   {/* Risk Marker Dot */}
                   <div
-                    className="absolute w-2.5 h-2.5 rounded-full border-2 border-[#12161a] bg-[#b84d43] shadow-xs z-10"
+                    className="absolute w-2.5 h-2.5 rounded-full border-2 border-white bg-rose-600 shadow-xs z-10"
                     style={{ bottom: `${riskVal}%` }}
                   />
 

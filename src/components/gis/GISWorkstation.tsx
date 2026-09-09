@@ -496,21 +496,21 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
   }
 
   return (
-    <div className="gis-workstation flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-[#0e1215] text-stone-100">
+    <div className="gis-workstation flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-slate-50 text-slate-800 font-sans">
       {/* Workstation Top Bar */}
-      <div className="h-12 border-b border-[#222930] bg-[#0e1215] px-4 flex items-center justify-between flex-shrink-0">
+      <div className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between flex-shrink-0 text-slate-800">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#8ea699]">
+          <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700">
             <Layers3 size={15} />
             <span>GIS WORKSPACE / SPATIAL ANALYZER</span>
           </span>
-          <span className="text-[#323d47]">|</span>
-          <span className="text-xs text-stone-400 font-mono">
+          <span className="text-slate-300">|</span>
+          <span className="text-xs text-slate-600 font-mono">
             {region.name}, {region.state}
           </span>
           <span
             className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-              isDemoMode ? 'bg-[#2c2014] text-[#dca24c] border border-[#48331e] animate-pulse' : 'bg-[#192720] text-[#7eb396] border border-[#294235]'
+              isDemoMode ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
             }`}
           >
             {isDemoMode ? '⚡ DEMO HAZARDS ACTIVE' : '● LIVE GIS FEEDS'}
@@ -519,15 +519,15 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
         <div className="flex items-center gap-2">
           {/* Basemap Switcher Selector */}
-          <div className="flex items-center bg-[#12161a] rounded-lg p-0.5 border border-[#222a32] text-[11px] font-mono">
+          <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-[11px] font-mono">
             {(['osm', 'terrain', 'satellite', 'dark'] as BasemapType[]).map((type) => (
               <button
                 key={type}
                 onClick={() => setCurrentBasemap(type)}
                 className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
                   currentBasemap === type
-                    ? 'bg-[#1e2e26] text-[#8ea699] border border-[#2f493c] font-bold'
-                    : 'text-stone-400 hover:text-stone-100'
+                    ? 'bg-white text-emerald-800 border border-slate-200 font-bold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {type.toUpperCase()}
@@ -537,7 +537,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           <button
             onClick={exportGeoJSON}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1e2e26] hover:bg-[#253930] text-stone-200 border border-[#2f493c] text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
           >
             <Download size={13} />
             <span>GeoJSON</span>
@@ -548,14 +548,14 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
       {/* Main Split View Workstation Body */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Left Control Panel: 300px Fixed Sidebar */}
-        <aside className="w-[300px] flex-shrink-0 bg-[#101417] border-r border-[#222930] flex flex-col h-full z-20 overflow-y-auto">
+        <aside className="w-[300px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col h-full z-20 overflow-y-auto shadow-xs text-slate-800">
           {/* ============================================================ */}
           {/* Landslide Risk & Hazard Density Heatmap Customization        */}
           {/* ============================================================ */}
-          <div className="p-4 border-b border-[#222930] bg-[#12171b]/90 space-y-3.5">
+          <div className="p-4 border-b border-slate-200 bg-slate-50/50 space-y-3.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#8ea699] uppercase tracking-wide">
-                <Flame size={14} className={heatmapEnabled ? 'text-rose-500 animate-pulse' : 'text-stone-500'} />
+              <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 uppercase tracking-wide">
+                <Flame size={14} className={heatmapEnabled ? 'text-rose-500 animate-pulse' : 'text-slate-400'} />
                 <span>Hazard Heatmap</span>
               </div>
               {/* Heatmap Layer Toggle: [ ON / OFF ] */}
@@ -563,8 +563,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                 onClick={() => setHeatmapEnabled(!heatmapEnabled)}
                 className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer border ${
                   heatmapEnabled
-                    ? 'bg-rose-950/70 text-rose-300 border-rose-800 shadow-xs'
-                    : 'bg-[#182026] text-stone-400 border-[#2a3744] hover:text-stone-200'
+                    ? 'bg-rose-100 text-rose-800 border-rose-300 shadow-xs'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900'
                 }`}
               >
                 {heatmapEnabled ? 'LAYER ON' : 'LAYER OFF'}
@@ -573,8 +573,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
             {/* Gradient Visual Indicator (Green -> Yellow -> Red -> Dark Red) */}
             <div className="space-y-1">
-              <div className="h-2 w-full rounded-full bg-gradient-to-r from-[#00ff00] via-[#ffff00] via-[#ff0000] to-[#b91c1c] opacity-90 border border-black/30" />
-              <div className="flex justify-between text-[9px] font-mono text-stone-400">
+              <div className="h-2 w-full rounded-full bg-gradient-to-r from-[#00ff00] via-[#ffff00] via-[#ff0000] to-[#b91c1c] opacity-90 border border-slate-300" />
+              <div className="flex justify-between text-[9px] font-mono text-slate-500">
                 <span>0.2 (Low)</span>
                 <span>0.5 (Mod)</span>
                 <span>0.8 (High)</span>
@@ -584,9 +584,9 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
             {/* Radius Slider: Range control (15px to 50px) */}
             <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+              <div className="flex justify-between text-slate-700 text-[11px] font-mono">
                 <span>Spread Radius:</span>
-                <span className="text-[#8ea699] font-bold">{heatmapRadius} px</span>
+                <span className="text-emerald-700 font-bold">{heatmapRadius} px</span>
               </div>
               <input
                 type="range"
@@ -596,15 +596,15 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                 value={heatmapRadius}
                 disabled={!heatmapEnabled}
                 onChange={(e) => setHeatmapRadius(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer disabled:opacity-35"
+                className="w-full accent-emerald-600 cursor-pointer disabled:opacity-35"
               />
             </div>
 
             {/* Opacity / Intensity Threshold: Range control (0.2 to 1.0) */}
             <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+              <div className="flex justify-between text-slate-700 text-[11px] font-mono">
                 <span>Intensity Threshold:</span>
-                <span className="text-[#dca24c] font-bold">{Math.round(heatmapIntensity * 100)}% ({heatmapIntensity.toFixed(2)})</span>
+                <span className="text-amber-700 font-bold">{Math.round(heatmapIntensity * 100)}% ({heatmapIntensity.toFixed(2)})</span>
               </div>
               <input
                 type="range"
@@ -614,40 +614,40 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                 value={heatmapIntensity}
                 disabled={!heatmapEnabled}
                 onChange={(e) => setHeatmapIntensity(Number(e.target.value))}
-                className="w-full accent-amber-500 cursor-pointer disabled:opacity-35"
+                className="w-full accent-amber-600 cursor-pointer disabled:opacity-35"
               />
             </div>
           </div>
 
           {/* Spatial Filters Section */}
-          <div className="p-4 border-b border-[#222930] space-y-3">
-            <div className="flex items-center justify-between text-xs font-mono font-semibold text-[#8ea699] uppercase">
+          <div className="p-4 border-b border-slate-200 space-y-3 bg-white">
+            <div className="flex items-center justify-between text-xs font-mono font-semibold text-emerald-700 uppercase">
               <span className="flex items-center gap-1.5">
                 <Sliders size={13} />
                 <span>Spatial Filters</span>
               </span>
-              <span className="text-stone-400 text-[10px]">REAL-TIME</span>
+              <span className="text-slate-400 text-[10px]">REAL-TIME</span>
             </div>
 
             {/* Date Slider */}
             <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+              <div className="flex justify-between text-slate-700 text-[11px] font-mono">
                 <span>Date Baseline:</span>
-                <span className="text-[#8ea699] font-bold">{dateRange}</span>
+                <span className="text-emerald-700 font-bold">{dateRange}</span>
               </div>
               <input
                 type="date"
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="w-full px-2 py-1 rounded bg-[#14181c] border border-[#252f38] text-xs text-stone-200 focus:ring-1 focus:ring-[#457c63]"
+                className="w-full px-2 py-1 rounded bg-white border border-slate-300 text-xs text-slate-800 focus:ring-1 focus:ring-emerald-600"
               />
             </div>
 
             {/* Elevation Filter */}
             <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+              <div className="flex justify-between text-slate-700 text-[11px] font-mono">
                 <span>Elevation Cutoff:</span>
-                <span className="text-[#dca24c] font-bold">&gt; {elevationThreshold}m</span>
+                <span className="text-amber-700 font-bold">&gt; {elevationThreshold}m</span>
               </div>
               <input
                 type="range"
@@ -656,20 +656,20 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                 step={100}
                 value={elevationThreshold}
                 onChange={(e) => setElevationThreshold(Number(e.target.value))}
-                className="w-full accent-[#457c63] cursor-pointer"
+                className="w-full accent-emerald-600 cursor-pointer"
               />
             </div>
 
             {/* Risk Severity Threshold */}
             <div className="space-y-1 text-xs">
-              <div className="flex justify-between text-stone-300 text-[11px] font-mono">
+              <div className="flex justify-between text-slate-700 text-[11px] font-mono">
                 <span>Risk Severity:</span>
-                <span className="text-[#d97c72] font-bold">{riskFilter}</span>
+                <span className="text-rose-700 font-bold">{riskFilter}</span>
               </div>
               <select
                 value={riskFilter}
                 onChange={(e) => setRiskFilter(e.target.value)}
-                className="w-full px-2 py-1 rounded bg-[#14181c] border border-[#252f38] text-xs text-stone-200 focus:ring-1 focus:ring-[#457c63]"
+                className="w-full px-2 py-1 rounded bg-white border border-slate-300 text-xs text-slate-800 focus:ring-1 focus:ring-emerald-600"
               >
                 <option value="All risks">All Risk Levels</option>
                 <option value="Critical only">Critical Only (≥76%)</option>
@@ -680,27 +680,27 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           </div>
 
           {/* Layer Categories: Collapsible Accordion Sections */}
-          <div className="p-4 space-y-4 flex-1">
-            <div className="text-xs font-mono font-semibold text-stone-400 uppercase tracking-wider">
+          <div className="p-4 space-y-3 flex-1 bg-white">
+            <div className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
               Layer Hierarchy & Opacity
             </div>
 
             {categories.map((category) => {
               const isOpen = openAccordions[category.id]
               return (
-                <div key={category.id} className="border border-[#222930] rounded-xl overflow-hidden bg-[#14181c]/60">
+                <div key={category.id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
                   {/* Category Header */}
                   <button
                     onClick={() => toggleAccordion(category.id)}
-                    className="w-full px-3 py-2.5 flex items-center justify-between text-xs font-bold hover:bg-[#182026] transition-colors cursor-pointer"
+                    className="w-full px-3 py-2.5 flex items-center justify-between text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer text-slate-800"
                   >
                     <span className={category.color}>{category.title}</span>
-                    {isOpen ? <ChevronUp size={14} className="text-stone-400" /> : <ChevronDown size={14} className="text-stone-400" />}
+                    {isOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
                   </button>
 
                   {/* Accordion Items & Opacity Sliders */}
                   {isOpen && (
-                    <div className="p-3 space-y-3 border-t border-[#222930] bg-[#101417]">
+                    <div className="p-3 space-y-3 border-t border-slate-100 bg-slate-50/70">
                       {category.items.map((item) => {
                         const opacity = layers[item] || 0
                         const isVisible = opacity > 0
@@ -708,19 +708,19 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                         return (
                           <div key={item} className="space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-slate-300 font-medium truncate pr-2">
+                              <span className="text-slate-700 font-medium truncate pr-2">
                                 {item}
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-mono text-[10px] text-slate-400">
+                                <span className="font-mono text-[10px] text-slate-500">
                                   {opacity}%
                                 </span>
                                 <button
                                   onClick={() => toggleLayerVisibility(item)}
-                                  className="text-slate-400 hover:text-white p-0.5 cursor-pointer"
+                                  className="text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
                                   title={isVisible ? 'Hide layer' : 'Show layer'}
                                 >
-                                  {isVisible ? <Eye size={13} className="text-emerald-400" /> : <EyeOff size={13} />}
+                                  {isVisible ? <Eye size={13} className="text-emerald-600" /> : <EyeOff size={13} />}
                                 </button>
                               </div>
                             </div>
@@ -732,7 +732,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                               max={100}
                               value={opacity}
                               onChange={(e) => updateLayerOpacity(item, Number(e.target.value))}
-                              className="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                              className="w-full accent-emerald-600 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                             />
                           </div>
                         )
@@ -745,16 +745,16 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           </div>
 
           {/* Sidebar Footer Info */}
-          <div className="p-3 border-t border-slate-800 text-[11px] font-mono text-slate-500">
+          <div className="p-3 border-t border-slate-200 text-[11px] font-mono text-slate-500 bg-slate-50">
             <span>Projection: EPSG:4326</span>
-            <div className="text-slate-400">North Eastern Regional Datum</div>
+            <div className="text-slate-600">North Eastern Regional Datum</div>
           </div>
         </aside>
 
         {/* Map Area: Remaining Width */}
         <main className="flex-1 relative h-full">
           {/* Floating Spatial Utility Tools Palette */}
-          <div className="absolute top-4 right-4 z-400 flex flex-col gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-700 shadow-xl backdrop-blur-md">
+          <div className="absolute top-4 right-4 z-400 flex flex-col gap-2 bg-white/95 p-1.5 rounded-xl border border-slate-200 shadow-xl backdrop-blur-md">
             <button
               onClick={() => {
                 if (mapInstance.current) {
@@ -768,7 +768,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                   )
                 }
               }}
-              className="p-2 rounded-lg transition-colors cursor-pointer text-slate-300 hover:bg-slate-800 hover:text-emerald-400"
+              className="p-2 rounded-lg transition-colors cursor-pointer text-slate-600 hover:bg-slate-100 hover:text-emerald-600"
               title="Locate Current Position (GPS)"
             >
               <LocateFixed size={16} />
@@ -782,8 +782,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
               }}
               className={`p-2 rounded-lg transition-colors cursor-pointer ${
                 activeTool === 'measure'
-                  ? 'bg-emerald-500 text-slate-950 font-bold'
-                  : 'text-slate-300 hover:bg-slate-800'
+                  ? 'bg-emerald-600 text-white font-bold'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
               title="Measure Tool (Distance / Slope)"
             >
@@ -798,8 +798,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
               }}
               className={`p-2 rounded-lg transition-colors cursor-pointer ${
                 activeTool === 'buffer'
-                  ? 'bg-indigo-500 text-white font-bold'
-                  : 'text-slate-300 hover:bg-slate-800'
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
               title="Buffer Radius Selector"
             >
@@ -814,8 +814,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
               }}
               className={`p-2 rounded-lg transition-colors cursor-pointer ${
                 activeTool === 'polygon'
-                  ? 'bg-amber-500 text-slate-950 font-bold'
-                  : 'text-slate-300 hover:bg-slate-800'
+                  ? 'bg-amber-600 text-white font-bold'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
               title="Polygon Area Select"
             >
@@ -825,10 +825,10 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           {/* Buffer Radius Control Popover when buffer tool active */}
           {activeTool === 'buffer' && (
-            <div className="absolute top-4 right-16 z-400 bg-[#12161a]/95 border border-[#2d3a46] p-3 rounded-xl shadow-2xl text-xs space-y-2 font-mono">
-              <div className="text-stone-200 font-bold flex items-center justify-between">
+            <div className="absolute top-4 right-16 z-400 bg-white/95 border border-slate-200 p-3 rounded-xl shadow-2xl text-xs space-y-2 font-mono text-slate-800">
+              <div className="text-slate-900 font-bold flex items-center justify-between">
                 <span>BUFFER RADIUS</span>
-                <span className="text-[#8ea699]">{bufferRadiusKm} KM</span>
+                <span className="text-emerald-700">{bufferRadiusKm} KM</span>
               </div>
               <div className="flex gap-1.5">
                 {[1, 3, 5, 10, 20].map((km) => (
@@ -837,8 +837,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                     onClick={() => setBufferRadiusKm(km)}
                     className={`px-2 py-1 rounded text-[10px] font-bold ${
                       bufferRadiusKm === km
-                        ? 'bg-[#1e2e26] text-[#8ea699] border border-[#2f493c]'
-                        : 'bg-[#161c22] text-stone-300 hover:bg-[#1a2229] border border-[#222a32]'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                     }`}
                   >
                     {km}km
@@ -850,19 +850,19 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           {/* Outside NER Notice Card (Live Mode) */}
           {!isDemoMode && !isNER && (
-            <div className="absolute top-4 left-4 z-400 max-w-md bg-[#12161a]/95 border border-[#48331e] rounded-xl p-3.5 shadow-2xl backdrop-blur-md">
+            <div className="absolute top-4 left-4 z-400 max-w-md bg-white/95 border border-amber-300 rounded-xl p-3.5 shadow-2xl backdrop-blur-md">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-[#2c2014] text-[#dca24c] mt-0.5 border border-[#48331e]">
+                <div className="p-2 rounded-lg bg-amber-50 text-amber-700 mt-0.5 border border-amber-200">
                   <MapPin size={16} />
                 </div>
                 <div className="flex-1 text-xs">
-                  <div className="font-semibold text-[#dca24c] flex items-center justify-between">
+                  <div className="font-semibold text-amber-800 flex items-center justify-between">
                     <span>LIVE GPS: OUTSIDE NER COVERAGE</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2c2014] text-[#dca24c] font-mono font-bold border border-[#48331e]">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono font-bold border border-amber-300">
                       ALLUVIAL PLAIN
                     </span>
                   </div>
-                  <p className="text-stone-300 mt-1 leading-relaxed text-[11px]">
+                  <p className="text-slate-600 mt-1 leading-relaxed text-[11px]">
                     Current position is <strong>{activeLocationName}</strong> ({activeLocationCoords.lat.toFixed(2)}°N, {activeLocationCoords.lon.toFixed(2)}°E). Terrain slope is nominal (&lt;3°) with zero landslide risk.
                   </p>
                   <div className="mt-2.5 flex items-center gap-2">
@@ -871,13 +871,13 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                         mapInstance.current?.flyTo([25.2, 93.2], 8, { duration: 1.5 })
                         notify?.('Panned map viewport to North Eastern Region (NER)')
                       }}
-                      className="px-2.5 py-1 rounded bg-[#182026] hover:bg-[#202b33] text-stone-200 text-[10px] font-medium border border-[#2b3742] transition cursor-pointer"
+                      className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium border border-slate-200 transition cursor-pointer"
                     >
                       Fly to NER Zone
                     </button>
                     <button
                       onClick={() => setMode('demo')}
-                      className="px-2.5 py-1 rounded bg-[#2c2014] hover:bg-[#382a1b] text-[#dca24c] border border-[#48331e] text-[10px] font-bold transition cursor-pointer"
+                      className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold transition cursor-pointer shadow-xs"
                     >
                       Launch NER Crisis Demo
                     </button>
@@ -888,35 +888,35 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           )}
 
           {/* Leaflet Map Host */}
-          <div ref={mapContainerRef} className="w-full h-full bg-[#0e1215]" />
+          <div ref={mapContainerRef} className="w-full h-full bg-slate-100" />
 
           {/* Bottom Retractable Spatial Summary Panel */}
           <div
-            className={`absolute bottom-0 left-0 right-0 z-400 bg-[#0e1215]/95 border-t border-[#222930] transition-all duration-300 backdrop-blur-md ${
+            className={`absolute bottom-0 left-0 right-0 z-400 bg-white/95 border-t border-slate-200 transition-all duration-300 backdrop-blur-md text-slate-800 shadow-xl ${
               shelfExpanded ? 'h-36' : 'h-10'
             }`}
           >
             {/* Shelf Toggle Bar */}
-            <div className="h-10 px-4 flex items-center justify-between border-b border-[#222930] text-xs font-mono text-stone-400">
+            <div className="h-10 px-4 flex items-center justify-between border-b border-slate-200 text-xs font-mono text-slate-600">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setShelfExpanded(!shelfExpanded)}
-                  className="flex items-center gap-1.5 font-bold text-[#8ea699] hover:text-[#a5c2b2] cursor-pointer"
+                  className="flex items-center gap-1.5 font-bold text-emerald-700 hover:text-emerald-800 cursor-pointer"
                 >
                   {shelfExpanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
                   <span>SPATIAL SUMMARY SHELF</span>
                 </button>
                 <span>|</span>
-                <span className="text-stone-300">
+                <span className="text-slate-700">
                   LAT: <b>{cursorCoords.lat}°N</b> LNG: <b>{cursorCoords.lng}°E</b>
                 </span>
-                <span className="hidden md:inline text-stone-500">ZOOM: 7x · EPSG:4326</span>
+                <span className="hidden md:inline text-slate-400">ZOOM: 7x · EPSG:4326</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <button
                   onClick={exportSpatialReport}
-                  className="flex items-center gap-1 text-[#8ea699] hover:text-[#a5c2b2] cursor-pointer"
+                  className="flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer"
                 >
                   <Download size={12} />
                   <span>Export Report</span>
@@ -928,41 +928,41 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
             {shelfExpanded && (
               <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
                 <div className="space-y-1">
-                  <div className="text-slate-400 text-[10px]">HISTORICAL BHUVAN ZONE</div>
-                  <div className="font-bold text-amber-400">
+                  <div className="text-slate-500 text-[10px]">HISTORICAL BHUVAN ZONE</div>
+                  <div className="font-bold text-amber-700">
                     {historicalBaseline.bhuvanHazardZone}
                   </div>
-                  <div className="text-slate-400 text-[10px]">
+                  <div className="text-slate-500 text-[10px]">
                     Susceptibility: {historicalBaseline.susceptibilityIndex}%
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-slate-400 text-[10px]">SOIL & TOPOGRAPHY</div>
-                  <div className="font-bold text-slate-200">
+                  <div className="text-slate-500 text-[10px]">SOIL & TOPOGRAPHY</div>
+                  <div className="font-bold text-slate-800">
                     {historicalBaseline.soilType}
                   </div>
-                  <div className="text-slate-400 text-[10px]">
+                  <div className="text-slate-500 text-[10px]">
                     Critical Slope: {historicalBaseline.criticalSlopeAngle}°
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-slate-400 text-[10px]">ACTIVE SCENARIO HAZARDS</div>
-                  <div className="font-bold text-rose-400">
+                  <div className="text-slate-500 text-[10px]">ACTIVE SCENARIO HAZARDS</div>
+                  <div className="font-bold text-rose-700">
                     {isDemoMode ? '3 Road Cuts · 2 Flood Zones' : 'Nominal Infrastructure'}
                   </div>
-                  <div className="text-slate-400 text-[10px]">
+                  <div className="text-slate-500 text-[10px]">
                     {isDemoMode ? 'KM-42 NH-102B Compromised' : 'No active blockages'}
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-slate-400 text-[10px]">ATMOSPHERIC TELEMETRY</div>
-                  <div className="font-bold text-emerald-400">
+                  <div className="text-slate-500 text-[10px]">ATMOSPHERIC TELEMETRY</div>
+                  <div className="font-bold text-emerald-700">
                     {weather?.relativeHumidity || 78}% Rel Humidity
                   </div>
-                  <div className="text-slate-400 text-[10px]">
+                  <div className="text-slate-500 text-[10px]">
                     Rain: {weather?.currentRainfall || 0} mm · Wind: {weather?.windSpeed || 12} km/h
                   </div>
                 </div>

@@ -69,18 +69,18 @@ const SECONDARY_NAV = [
 export function Brand({ onClick }: { onClick?: () => void }) {
   return (
     <button
-      className="flex items-center gap-2.5 text-left text-stone-100 hover:opacity-90 transition-opacity cursor-pointer flex-shrink-0"
+      className="flex items-center gap-2.5 text-left text-slate-900 hover:opacity-90 transition-opacity cursor-pointer flex-shrink-0"
       onClick={onClick}
       aria-label="Sentinel NER Home"
     >
-      <span className="w-8 h-8 rounded-md grid place-items-center bg-[#182026] border border-[#2b3742] text-[#8ea699] font-bold shadow-xs">
+      <span className="w-8 h-8 rounded-md grid place-items-center bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold shadow-xs">
         <Mountain size={17} />
       </span>
       <div className="flex flex-col">
-        <span className="text-xs sm:text-sm tracking-wider font-extrabold text-stone-100 font-mono leading-none">
-          SENTINEL <span className="text-[#8ea699]">NER</span>
+        <span className="text-xs sm:text-sm tracking-wider font-extrabold text-slate-900 font-mono leading-none">
+          SENTINEL <span className="text-emerald-700">NER</span>
         </span>
-        <span className="text-[9px] text-stone-400 font-medium tracking-tight mt-0.5 leading-none">
+        <span className="text-[9px] text-slate-500 font-medium tracking-tight mt-0.5 leading-none">
           Disaster Early Warning
         </span>
       </div>
@@ -122,7 +122,7 @@ export function TopNav({
   }, [moreOpen])
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#0e1215]/95 backdrop-blur-md border-b border-[#222930] font-sans text-stone-200">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 font-sans text-slate-800 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
         {/* ============================================================ */}
         {/* LEFT: Sentinel NER Brand Logo                                */}
@@ -132,7 +132,7 @@ export function TopNav({
 
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden p-1.5 text-stone-400 hover:text-stone-100 rounded-md hover:bg-[#181f26] transition-colors"
+            className="md:hidden p-1.5 text-slate-600 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle navigation menu"
           >
@@ -156,11 +156,11 @@ export function TopNav({
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#1a2229] text-stone-100 border border-[#2b3742] shadow-xs'
-                    : 'text-stone-400 hover:text-stone-100 hover:bg-[#151c22]'
+                    ? 'bg-slate-100 text-slate-900 border border-slate-200 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <Icon size={14} className={isActive ? 'text-[#8ea699]' : 'text-stone-500'} />
+                <Icon size={14} className={isActive ? 'text-emerald-700' : 'text-slate-400'} />
                 <span>{label}</span>
               </button>
             )
@@ -172,8 +172,8 @@ export function TopNav({
               onClick={() => setMoreOpen(!moreOpen)}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                 moreOpen || SECONDARY_NAV.some((n) => n.route === route)
-                  ? 'bg-[#1a2229] text-stone-100 border border-[#2b3742]'
-                  : 'text-stone-400 hover:text-stone-100 hover:bg-[#151c22]'
+                  ? 'bg-slate-100 text-slate-900 border border-slate-200 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
               aria-expanded={moreOpen}
               aria-haspopup="true"
@@ -181,16 +181,16 @@ export function TopNav({
               <span>More</span>
               <ChevronDown
                 size={13}
-                className={`transition-transform duration-150 ${moreOpen ? 'rotate-180 text-stone-200' : 'text-stone-500'}`}
+                className={`transition-transform duration-150 ${moreOpen ? 'rotate-180 text-slate-700' : 'text-slate-400'}`}
               />
             </button>
 
             {moreOpen && (
               <div
-                className="absolute left-0 mt-1.5 w-60 z-50 bg-[#12161a] border border-[#252f38] rounded-lg shadow-2xl py-1.5 text-xs animate-in fade-in zoom-in-95 duration-100"
+                className="absolute left-0 mt-1.5 w-60 z-50 bg-white border border-slate-200 rounded-lg shadow-xl py-1.5 text-xs animate-in fade-in zoom-in-95 duration-100"
                 role="menu"
               >
-                <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-stone-400">
+                <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400">
                   Operations & Intelligence
                 </div>
                 {SECONDARY_NAV.map(({ label, icon: Icon, route: target, tag }) => (
@@ -203,32 +203,32 @@ export function TopNav({
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 text-left transition-colors cursor-pointer ${
                       route === target
-                        ? 'bg-[#1a2229] text-stone-100 font-bold'
-                        : 'text-stone-300 hover:bg-[#181f26] hover:text-stone-100'
+                        ? 'bg-slate-100 text-slate-900 font-bold'
+                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                     role="menuitem"
                   >
                     <div className="flex items-center gap-2">
-                      <Icon size={14} className="text-stone-400" />
+                      <Icon size={14} className="text-slate-500" />
                       <span>{label}</span>
                     </div>
                     {tag && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#2f1f21] text-[#e07a70] border border-[#482b2d] font-bold">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold">
                         {tag}
                       </span>
                     )}
                   </button>
                 ))}
 
-                <div className="my-1 border-t border-[#222930]" />
+                <div className="my-1 border-t border-slate-100" />
                 <button
                   onClick={() => {
                     simulate()
                     setMoreOpen(false)
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left text-[#dca24c] hover:bg-[#251d14] transition-colors cursor-pointer font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left text-amber-800 hover:bg-amber-50 transition-colors cursor-pointer font-medium"
                 >
-                  <Zap size={14} className="text-[#dca24c]" />
+                  <Zap size={14} className="text-amber-600" />
                   <span>Escalate Scenario Test</span>
                 </button>
               </div>
@@ -241,25 +241,25 @@ export function TopNav({
         {/* ============================================================ */}
         <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
           {/* Location Status Indicator Badge */}
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#12161a] border border-[#222a32] text-xs font-mono">
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-mono">
             <span
               className={`w-2 h-2 rounded-full ${
-                isDemoMode ? 'bg-[#c28b38] animate-pulse' : 'bg-[#457c63]'
+                isDemoMode ? 'bg-amber-500 animate-pulse' : 'bg-emerald-600'
               }`}
             />
-            <span className="font-semibold text-stone-200 max-w-[150px] truncate">
+            <span className="font-semibold text-slate-800 max-w-[150px] truncate">
               {isDemoMode ? 'DEMO | Churachandpur' : `LIVE | ${userLocation.city || 'Kanpur'}`}
             </span>
           </div>
 
           {/* Compact Discreet Data Mode Toggle (Restrained, not giant) */}
-          <div className="flex items-center bg-[#12161a] rounded-md p-0.5 border border-[#222a32] text-[11px] font-mono">
+          <div className="flex items-center bg-slate-100 rounded-md p-0.5 border border-slate-200 text-[11px] font-mono">
             <button
               onClick={() => setMode('live')}
               className={`px-2 py-0.5 rounded transition-all cursor-pointer font-semibold ${
                 dataMode === 'live'
-                  ? 'bg-[#192720] text-[#7eb396] border border-[#294235] shadow-xs'
-                  : 'text-stone-400 hover:text-stone-200'
+                  ? 'bg-white text-emerald-800 border border-slate-200 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
               title="Live Open-Meteo & NASA Historical Baselines"
             >
@@ -269,8 +269,8 @@ export function TopNav({
               onClick={() => setMode('demo')}
               className={`px-2 py-0.5 rounded transition-all cursor-pointer font-semibold ${
                 dataMode === 'demo'
-                  ? 'bg-[#2c2014] text-[#dca24c] border border-[#48331e] shadow-xs'
-                  : 'text-stone-400 hover:text-stone-200'
+                  ? 'bg-white text-amber-800 border border-slate-200 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
               title="Simulated Landslide Developing Scenario (Churachandpur)"
             >
@@ -280,7 +280,7 @@ export function TopNav({
 
           {/* Search trigger */}
           <button
-            className="p-1.5 text-stone-400 hover:text-stone-100 rounded-md hover:bg-[#181f26] transition-colors cursor-pointer"
+            className="p-1.5 text-slate-500 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
             onClick={() => {
               setSearch('')
               setModal('search')
@@ -293,20 +293,20 @@ export function TopNav({
 
           {/* Notifications */}
           <button
-            className="relative p-1.5 text-stone-400 hover:text-stone-100 rounded-md hover:bg-[#181f26] transition-colors cursor-pointer"
+            className="relative p-1.5 text-slate-500 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
             onClick={() => setModal('notifications')}
             aria-label="Active Notifications"
             title="System Alerts"
           >
             <Bell size={16} />
             {notifications > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#b84d43] ring-1 ring-[#0e1215]" />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
             )}
           </button>
 
           {/* Avatar / Profile */}
           <button
-            className="w-7 h-7 rounded-md bg-[#1a2229] hover:bg-[#242f38] text-stone-200 border border-[#2b3742] font-mono font-bold text-xs flex items-center justify-center shadow-xs cursor-pointer transition-colors"
+            className="w-7 h-7 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-mono font-bold text-xs flex items-center justify-center shadow-xs cursor-pointer transition-colors"
             onClick={() => setModal('profile')}
             aria-label="User Profile"
             title="Operations Commander"
@@ -318,18 +318,18 @@ export function TopNav({
 
       {/* Outside NER Notice Banner for Live Mode */}
       {!isDemoMode && !isNER && (
-        <div className="bg-[#12161a] text-stone-300 border-t border-[#222930] px-4 py-1.5 text-xs flex items-center justify-between gap-2">
+        <div className="bg-slate-50 text-slate-700 border-t border-slate-200 px-4 py-1.5 text-xs flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 truncate">
-            <span className="w-2 h-2 rounded-full bg-[#7eb396] animate-pulse flex-shrink-0" />
-            <span className="font-mono text-[#7eb396] font-semibold text-[11px]">LIVE GPS DETECTED:</span>
-            <span className="text-stone-100 font-medium truncate text-xs">{activeLocationName}</span>
-            <span className="text-stone-400 hidden md:inline text-[11px]">(Outside NER coverage · flat alluvial relief · zero landslide risk)</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <span className="font-mono text-emerald-700 font-semibold text-[11px]">LIVE GPS DETECTED:</span>
+            <span className="text-slate-900 font-medium truncate text-xs">{activeLocationName}</span>
+            <span className="text-slate-500 hidden md:inline text-[11px]">(Outside NER coverage · flat alluvial relief · zero landslide risk)</span>
           </div>
           <button
             onClick={() => setMode('demo')}
-            className="flex-shrink-0 px-2 py-0.5 rounded bg-[#2c2014] hover:bg-[#382a1b] text-[#dca24c] border border-[#48331e] font-bold font-mono text-[10px] sm:text-[11px] transition-colors cursor-pointer flex items-center gap-1"
+            className="flex-shrink-0 px-2.5 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold font-mono text-[10px] sm:text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
           >
-            <Zap size={11} />
+            <Zap size={11} className="text-amber-700" />
             <span>Explore NER Crisis Demo</span>
           </button>
         </div>
@@ -339,8 +339,8 @@ export function TopNav({
       {/* Mobile Collapsible Navigation Drawer                         */}
       {/* ============================================================ */}
       {menuOpen && (
-        <div className="md:hidden border-t border-[#222930] bg-[#12161a] px-4 py-3 space-y-2 text-xs text-stone-300">
-          <div className="text-[10px] font-mono text-stone-400 uppercase">Primary Workspaces</div>
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2 text-xs text-slate-700 shadow-md">
+          <div className="text-[10px] font-mono text-slate-400 uppercase">Primary Workspaces</div>
           <div className="grid grid-cols-2 gap-1.5">
             {PRIMARY_NAV.map(({ label, icon: Icon, route: target }) => (
               <button
@@ -350,16 +350,16 @@ export function TopNav({
                   setMenuOpen(false)
                 }}
                 className={`flex items-center gap-1.5 p-2 rounded-md font-semibold text-left ${
-                  route === target ? 'bg-[#1a2229] text-stone-100 border border-[#2b3742]' : 'bg-[#161c22] text-stone-300 hover:text-stone-100 border border-[#222a32]'
+                  route === target ? 'bg-slate-100 text-slate-900 border border-slate-200 font-bold' : 'bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200'
                 }`}
               >
-                <Icon size={14} className={route === target ? 'text-[#8ea699]' : 'text-stone-400'} />
+                <Icon size={14} className={route === target ? 'text-emerald-700' : 'text-slate-400'} />
                 <span>{label}</span>
               </button>
             ))}
           </div>
 
-          <div className="pt-2 text-[10px] font-mono text-stone-400 uppercase">Secondary Modules</div>
+          <div className="pt-2 text-[10px] font-mono text-slate-400 uppercase">Secondary Modules</div>
           <div className="grid grid-cols-2 gap-1.5">
             {SECONDARY_NAV.slice(0, 4).map(({ label, icon: Icon, route: target }) => (
               <button
@@ -368,9 +368,9 @@ export function TopNav({
                   go(target)
                   setMenuOpen(false)
                 }}
-                className="flex items-center gap-1.5 p-1.5 rounded-md bg-[#161c22] text-stone-300 text-[11px] border border-[#222a32]"
+                className="flex items-center gap-1.5 p-1.5 rounded-md bg-slate-50 text-slate-700 text-[11px] border border-slate-200"
               >
-                <Icon size={13} className="text-stone-400" />
+                <Icon size={13} className="text-slate-400" />
                 <span className="truncate">{label}</span>
               </button>
             ))}
