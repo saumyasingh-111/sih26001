@@ -142,7 +142,7 @@ export function RiskIntelligenceWorkspace({ go, notify }: RiskIntelligenceWorksp
         </div>
 
         {/* District Switcher Selector */}
-        <div className="flex items-center gap-2">
+        {/* {<div className="flex items-center gap-2">
           <span className="text-xs font-mono text-slate-500 hidden sm:inline">District:</span>
           <select
             value={activeDistrict}
@@ -162,7 +162,7 @@ export function RiskIntelligenceWorkspace({ go, notify }: RiskIntelligenceWorksp
             <ArrowRight size={13} />
             <span>Command Center</span>
           </button>
-        </div>
+        </div>} */}
       </div>
 
       {/* Success Notice Banner */}

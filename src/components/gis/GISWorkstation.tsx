@@ -40,7 +40,7 @@ interface GISWorkstationProps {
 
 type BasemapType = 'osm' | 'terrain' | 'satellite' | 'dark'
 
-export function GISWorkstation({ region, score, incident, notify }: GISWorkstationProps) {
+function GISWorkstation({ region, score, incident, notify }: GISWorkstationProps) {
   const {
     dataMode,
     isDemoMode,

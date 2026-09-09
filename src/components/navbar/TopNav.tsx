@@ -10,7 +10,6 @@ import {
   Database,
   FileText,
   Globe2,
-  Layers3,
   Menu,
   Mountain,
   Radio,
@@ -29,7 +28,6 @@ export type RouteName =
   | 'command-center'
   | 'risk-intelligence'
   | 'field-reports'
-  | 'gis'
   | 'alerts'
   | 'response-planning'
   | 'analytics'
@@ -53,7 +51,6 @@ const PRIMARY_NAV = [
   { label: 'Command Center', icon: Crosshair, route: 'command-center' as RouteName },
   { label: 'Risk Intelligence', icon: BrainCircuit, route: 'risk-intelligence' as RouteName },
   { label: 'Field Reports', icon: FileText, route: 'field-reports' as RouteName },
-  { label: 'GIS Layers', icon: Layers3, route: 'gis' as RouteName },
 ]
 
 // Secondary modules accessible via clean "More" dropdown
@@ -141,8 +138,7 @@ export function TopNav({
         </div>
 
         {/* ============================================================ */}
-        {/* CENTER: 4 Primary Operational Tabs + More Dropdown           */}
-        {/* Strictly fits on 1366px laptop screens without wrapping     */}
+        {/* CENTER: 3 Primary Operational Tabs + More Dropdown           */}
         {/* ============================================================ */}
         <div className="hidden md:flex items-center gap-1 flex-1 justify-center max-w-2xl">
           {PRIMARY_NAV.map(({ label, icon: Icon, route: target }) => {
