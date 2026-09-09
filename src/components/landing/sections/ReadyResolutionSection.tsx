@@ -46,7 +46,7 @@ export function ReadyResolutionSection({ go, setDemoMode }: ReadyResolutionSecti
             onClick={() => go('command-center')}
             className="px-8 py-3.5 rounded-lg bg-stone-100 hover:bg-white text-stone-950 font-sans font-semibold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 tracking-wide shadow-lg"
           >
-            <span>Enter Sentinel NER</span>
+            <span>Enter Sahyog</span>
             <ArrowRight size={15} />
           </button>
 
@@ -66,7 +66,7 @@ export function ReadyResolutionSection({ go, setDemoMode }: ReadyResolutionSecti
       {/* Minimal Footer */}
       <footer className="relative z-20 pb-8 px-6 sm:px-12 max-w-4xl mx-auto w-full text-center space-y-2 border-t border-stone-800/60 pt-6 text-xs text-stone-400 font-sans">
         <div className="font-editorial text-base text-stone-300 font-semibold tracking-wide">
-          SENTINEL NER
+          SAHYOG
         </div>
         <div className="text-[11px] text-stone-400 tracking-wider">
           AI-POWERED LANDSLIDE EARLY WARNING · NORTH EASTERN REGION

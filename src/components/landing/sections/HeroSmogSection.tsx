@@ -77,7 +77,7 @@ export function HeroSmogSection() {
         <div className="relative z-30 px-6 sm:px-12 max-w-4xl mx-auto w-full text-center my-auto">
           {/* Brand Eyebrow */}
           <div className="text-[11px] font-sans tracking-[0.2em] text-stone-400 uppercase mb-4">
-            SENTINEL NER
+            Sahyog
           </div>
 
           {/* Initial Headline (0% Scroll: Mist Dense) */}
@@ -98,7 +98,7 @@ export function HeroSmogSection() {
             className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none space-y-3"
           >
             <div className="text-[11px] font-sans tracking-[0.2em] text-stone-300 uppercase">
-              SENTINEL NER
+              Sahyog
             </div>
             <h2 className="font-editorial text-4xl sm:text-6xl text-stone-100 font-normal tracking-tight">
               Landslide <span className="italic font-light text-stone-300">Early Warning</span>

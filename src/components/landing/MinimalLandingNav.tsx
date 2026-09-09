@@ -35,7 +35,7 @@ export function MinimalLandingNav({ go }: MinimalLandingNavProps) {
             <Mountain size={15} />
           </span>
           <span className="font-editorial text-lg tracking-wider font-semibold text-stone-100">
-            SENTINEL <span className="font-light italic text-stone-300">NER</span>
+            SAHYOG
           </span>
         </button>
 

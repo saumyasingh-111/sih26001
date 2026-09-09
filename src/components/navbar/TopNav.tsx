@@ -75,7 +75,7 @@ export function Brand({ onClick }: { onClick?: () => void }) {
       </span>
       <div className="flex flex-col">
         <span className="text-xs sm:text-sm tracking-wider font-extrabold text-slate-900 font-mono leading-none">
-          SENTINEL <span className="text-emerald-700">NER</span>
+          Sahyog
         </span>
         <span className="text-[9px] text-slate-500 font-medium tracking-tight mt-0.5 leading-none">
           Disaster Early Warning
