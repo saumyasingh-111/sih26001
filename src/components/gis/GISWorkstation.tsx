@@ -203,6 +203,29 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     }
   }, [])
 
+  // Keep Leaflet's internal size in sync with its container.
+  // Because this page is a flex column inside a fixed-height shell, the map
+  // pane can be measured before layout settles (or after the window resizes),
+  // which leaves grey gaps / mis-positioned tiles. invalidateSize() fixes it.
+  useEffect(() => {
+    const map = mapInstance.current
+    const host = mapContainerRef.current
+    if (!map || !host) return
+
+    // settle after first paint
+    const raf = requestAnimationFrame(() => map.invalidateSize())
+
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize()
+    })
+    observer.observe(host)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      observer.disconnect()
+    }
+  }, [])
+
   // Auto-pan / flyTo when active coordinates or mode change
   useEffect(() => {
     if (!mapInstance.current) return
@@ -496,20 +519,41 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
   }
 
   return (
-    <div className="gis-workstation flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-slate-50 text-slate-800 font-sans">
-      {/* Workstation Top Bar */}
-      <div className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between flex-shrink-0 text-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700">
-            <Layers3 size={15} />
-            <span>GIS WORKSPACE / SPATIAL ANALYZER</span>
+    /*
+      IMPORTANT — root class renamed: "gis-workstation" -> "sentinel-gis-page".
+
+      The old class name collided with a leftover rule from a previous,
+      non-Tailwind version of this page that still lives in the global
+      stylesheet:
+
+          .gis-workstation { display: grid; grid-template-columns: 300px minmax(0,1fr); ... }
+
+      That rule is unlayered CSS, so it beat Tailwind's `flex flex-col`
+      utilities and silently turned this container into a 2-column grid.
+      The result: the top toolbar (first child) was squeezed into the 300px
+      column and the sidebar+map body (second child) into the other, on a
+      single row — which is why the "GIS WORKSPACE / SPATIAL ANALYZER" bar
+      appeared clipped and overlapping the map instead of sitting above it.
+
+      Also delete the dead `.gis-workstation`, `.gis-sidebar`, `.gis-map-stage`,
+      `.gis-live-badge`, `.gis-map-tools`, `.spatial-shelf` and `.shelf-actions`
+      rules from the stylesheet — nothing in this component uses them anymore.
+    */
+    <div className="sentinel-gis-page flex flex-col h-[calc(100vh-4rem)] min-h-0 overflow-hidden bg-slate-50 text-slate-800 font-sans">
+      {/* Workstation Top Bar — own flow row, never overlaps the map */}
+      <div className="h-12 border-b border-slate-200 bg-white px-4 flex items-center justify-between flex-shrink-0 gap-3 text-slate-800 overflow-x-auto">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 whitespace-nowrap">
+            <Layers3 size={15} className="flex-shrink-0" />
+            <span className="hidden sm:inline">GIS WORKSPACE / SPATIAL ANALYZER</span>
+            <span className="sm:hidden">GIS</span>
           </span>
-          <span className="text-slate-300">|</span>
-          <span className="text-xs text-slate-600 font-mono">
+          <span className="text-slate-300 hidden sm:inline">|</span>
+          <span className="text-xs text-slate-600 font-mono truncate">
             {region.name}, {region.state}
           </span>
           <span
-            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold whitespace-nowrap flex-shrink-0 ${
               isDemoMode ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse' : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
             }`}
           >
@@ -517,14 +561,14 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Basemap Switcher Selector */}
           <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-[11px] font-mono">
             {(['osm', 'terrain', 'satellite', 'dark'] as BasemapType[]).map((type) => (
               <button
                 key={type}
                 onClick={() => setCurrentBasemap(type)}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap ${
                   currentBasemap === type
                     ? 'bg-white text-emerald-800 border border-slate-200 font-bold shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -537,7 +581,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           <button
             onClick={exportGeoJSON}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors cursor-pointer shadow-xs whitespace-nowrap"
           >
             <Download size={13} />
             <span>GeoJSON</span>
@@ -546,7 +590,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
       </div>
 
       {/* Main Split View Workstation Body */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 min-h-0 flex overflow-hidden relative">
         {/* Left Control Panel: 300px Fixed Sidebar */}
         <aside className="w-[300px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col h-full z-20 overflow-y-auto shadow-xs text-slate-800">
           {/* ============================================================ */}
@@ -673,8 +717,8 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
               >
                 <option value="All risks">All Risk Levels</option>
                 <option value="Critical only">Critical Only (≥76%)</option>
-                <option value="High and above">High & Above (≥51%)</option>
-                <option value="Moderate and above">Moderate & Above (≥31%)</option>
+                <option value="High and above">High &amp; Above (≥51%)</option>
+                <option value="Moderate and above">Moderate &amp; Above (≥31%)</option>
               </select>
             </div>
           </div>
@@ -682,7 +726,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           {/* Layer Categories: Collapsible Accordion Sections */}
           <div className="p-4 space-y-3 flex-1 bg-white">
             <div className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
-              Layer Hierarchy & Opacity
+              Layer Hierarchy &amp; Opacity
             </div>
 
             {categories.map((category) => {
@@ -752,7 +796,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
         </aside>
 
         {/* Map Area: Remaining Width */}
-        <main className="flex-1 relative h-full isolate">
+        <main className="flex-1 min-w-0 relative h-full isolate">
           {/* Floating Spatial Utility Tools Palette */}
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 bg-white/95 p-1.5 rounded-xl border border-slate-200 shadow-xl backdrop-blur-md">
             <button
@@ -938,7 +982,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-slate-500 text-[10px]">SOIL & TOPOGRAPHY</div>
+                  <div className="text-slate-500 text-[10px]">SOIL &amp; TOPOGRAPHY</div>
                   <div className="font-bold text-slate-800">
                     {historicalBaseline.soilType}
                   </div>
