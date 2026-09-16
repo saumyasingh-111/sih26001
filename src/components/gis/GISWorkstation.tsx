@@ -752,9 +752,9 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
         </aside>
 
         {/* Map Area: Remaining Width */}
-        <main className="flex-1 relative h-full">
+        <main className="flex-1 relative h-full isolate">
           {/* Floating Spatial Utility Tools Palette */}
-          <div className="absolute top-4 right-4 z-400 flex flex-col gap-2 bg-white/95 p-1.5 rounded-xl border border-slate-200 shadow-xl backdrop-blur-md">
+          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 bg-white/95 p-1.5 rounded-xl border border-slate-200 shadow-xl backdrop-blur-md">
             <button
               onClick={() => {
                 if (mapInstance.current) {
@@ -825,7 +825,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           {/* Buffer Radius Control Popover when buffer tool active */}
           {activeTool === 'buffer' && (
-            <div className="absolute top-4 right-16 z-400 bg-white/95 border border-slate-200 p-3 rounded-xl shadow-2xl text-xs space-y-2 font-mono text-slate-800">
+            <div className="absolute top-4 right-16 z-20 bg-white/95 border border-slate-200 p-3 rounded-xl shadow-2xl text-xs space-y-2 font-mono text-slate-800">
               <div className="text-slate-900 font-bold flex items-center justify-between">
                 <span>BUFFER RADIUS</span>
                 <span className="text-emerald-700">{bufferRadiusKm} KM</span>
@@ -850,7 +850,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           {/* Outside NER Notice Card (Live Mode) */}
           {!isDemoMode && !isNER && (
-            <div className="absolute top-4 left-4 z-400 max-w-md bg-white/95 border border-amber-300 rounded-xl p-3.5 shadow-2xl backdrop-blur-md">
+            <div className="absolute top-4 left-4 z-20 max-w-md bg-white/95 border border-amber-300 rounded-xl p-3.5 shadow-2xl backdrop-blur-md">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-lg bg-amber-50 text-amber-700 mt-0.5 border border-amber-200">
                   <MapPin size={16} />
@@ -892,7 +892,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
 
           {/* Bottom Retractable Spatial Summary Panel */}
           <div
-            className={`absolute bottom-0 left-0 right-0 z-400 bg-white/95 border-t border-slate-200 transition-all duration-300 backdrop-blur-md text-slate-800 shadow-xl ${
+            className={`absolute bottom-0 left-0 right-0 z-20 bg-white/95 border-t border-slate-200 transition-all duration-300 backdrop-blur-md text-slate-800 shadow-xl ${
               shelfExpanded ? 'h-36' : 'h-10'
             }`}
           >

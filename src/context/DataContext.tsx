@@ -66,6 +66,8 @@ export interface DataContextType {
   activeDistrict: string
   setActiveDistrict: (name: string) => void
   activeRegion: Region
+  isManualDistrictSelected: boolean
+  useMyCurrentLocation: () => void
 
   // Live Weather
   weather: LiveWeatherData
@@ -100,6 +102,35 @@ export interface DataContextType {
 }
 
 const DataContext = createContext<DataContextType | null>(null)
+
+// ============================================================================
+// Static geo/state lookup for every district in `regions` (data/demoData.ts).
+// This is what lets a MANUALLY selected district drive real weather/risk data
+// independently of the browser's GPS location. If you add a new district to
+// `regions`, add its coordinates + state here too, or it will silently fall
+// back to a text-only weather lookup (getCurrentWeather(name)) instead of
+// precise lat/lon telemetry.
+// ============================================================================
+interface RegionMeta {
+  lat: number
+  lon: number
+  state: string
+}
+
+const REGION_COORDINATES: Record<string, RegionMeta> = {
+  Churachandpur: { lat: 24.33, lon: 93.67, state: 'Manipur' },
+  'East Khasi Hills': { lat: 25.5788, lon: 91.8933, state: 'Meghalaya' },
+  Tawang: { lat: 27.5859, lon: 91.8594, state: 'Arunachal Pradesh' },
+  Gangtok: { lat: 27.3389, lon: 88.6065, state: 'Sikkim' },
+  Kohima: { lat: 25.6751, lon: 94.1086, state: 'Nagaland' },
+  Aizawl: { lat: 23.7271, lon: 92.7176, state: 'Mizoram' },
+  Dibrugarh: { lat: 27.4728, lon: 94.912, state: 'Assam' },
+  Agartala: { lat: 23.8315, lon: 91.2868, state: 'Tripura' },
+}
+
+function getRegionMeta(districtName: string): RegionMeta | undefined {
+  return REGION_COORDINATES[districtName]
+}
 
 // Connectivity / Blackout Registry across monitored districts
 export const INITIAL_CONNECTIVITY_ZONES: ConnectivityZone[] = [
@@ -259,7 +290,13 @@ export const DEMO_INCIDENT: Incident = {
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [dataMode, setDataMode] = useState<DataMode>('live')
-  const [activeDistrict, setActiveDistrict] = useState<string>('Churachandpur')
+  const [activeDistrict, setActiveDistrictState] = useState<string>('Churachandpur')
+
+  // NEW: tracks whether the user has explicitly picked a district from a
+  // dropdown/search, as opposed to us just showing whatever their GPS says.
+  // Manual selection takes priority over GPS until the user asks to go back
+  // to their current location (or switches into Demo Mode).
+  const [isManualDistrictSelected, setIsManualDistrictSelected] = useState<boolean>(false)
 
   // Real GPS & Location State
   const [userLocation, setUserLocation] = useState<UserLocation>(DEFAULT_FALLBACK_LOCATION)
@@ -286,6 +323,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const isDemoMode = dataMode === 'demo'
 
+  // Public setter used by the District dropdown / search. Selecting a
+  // district always flips on manual override so the rest of the pipeline
+  // (weather, isNER, coords) knows to trust the dropdown instead of GPS.
+  const setActiveDistrict = useCallback((name: string) => {
+    setActiveDistrictState(name)
+    setIsManualDistrictSelected(true)
+  }, [])
+
+  // Lets the UI offer a "Use my current location" action that drops the
+  // manual override and goes back to trusting GPS.
+  const useMyCurrentLocation = useCallback(() => {
+    setIsManualDistrictSelected(false)
+  }, [])
+
   // Trigger GPS detection on mount
   const runLocationDetection = useCallback(async (force: boolean = false) => {
     setLocationLoading(true)
@@ -308,31 +359,50 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [runLocationDetection])
 
   const redetectLocation = async () => {
+    // Explicitly re-detecting GPS is a strong signal the user wants to go
+    // back to their real location, so clear any manual district override.
+    setIsManualDistrictSelected(false)
     await runLocationDetection(true)
   }
 
-  // Active coordinates & location name based on mode
+  // Active coordinates & location name based on mode.
+  // Priority: Demo scenario > manually selected district > real GPS > default.
   const activeLocationCoords = useMemo(() => {
     if (isDemoMode) {
       return { lat: 24.33, lon: 93.67 } // Churachandpur, Manipur
+    }
+    if (isManualDistrictSelected) {
+      const meta = getRegionMeta(activeDistrict)
+      if (meta) {
+        return { lat: meta.lat, lon: meta.lon }
+      }
     }
     if (userLocation.isDetected) {
       return { lat: userLocation.lat, lon: userLocation.lon }
     }
     return { lat: 24.33, lon: 93.67 }
-  }, [isDemoMode, userLocation])
+  }, [isDemoMode, isManualDistrictSelected, activeDistrict, userLocation])
 
   const activeLocationName = useMemo(() => {
     if (isDemoMode) {
       return 'Churachandpur, Manipur'
     }
+    if (isManualDistrictSelected) {
+      const meta = getRegionMeta(activeDistrict)
+      if (meta) {
+        return `${activeDistrict}, ${meta.state}`
+      }
+      return activeDistrict
+    }
     if (userLocation.isDetected) {
       return userLocation.displayName
     }
     return 'Churachandpur, Manipur (Default Center)'
-  }, [isDemoMode, userLocation])
+  }, [isDemoMode, isManualDistrictSelected, activeDistrict, userLocation])
 
-  // Fetch real Open-Meteo weather whenever mode, coords or active district change
+  // Fetch real Open-Meteo weather whenever mode, coords, or district
+  // selection changes. Manual district selection now takes priority over
+  // the browser's detected GPS location.
   const loadWeather = useCallback(async () => {
     setWeatherLoading(true)
     setWeatherError(null)
@@ -340,6 +410,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       if (isDemoMode) {
         const data = await getCurrentWeather('Churachandpur')
         setWeather(data)
+      } else if (isManualDistrictSelected) {
+        const meta = getRegionMeta(activeDistrict)
+        if (meta) {
+          const data = await getWeatherForCoordinates(meta.lat, meta.lon, activeDistrict, meta.state)
+          setWeather(data)
+        } else {
+          // District isn't in our coordinate table yet — fall back to a
+          // name-based lookup rather than silently showing GPS weather.
+          const data = await getCurrentWeather(activeDistrict)
+          setWeather(data)
+        }
       } else if (userLocation.isDetected) {
         const data = await getWeatherForCoordinates(
           userLocation.lat,
@@ -357,7 +438,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setWeatherLoading(false)
     }
-  }, [isDemoMode, userLocation, activeDistrict])
+  }, [isDemoMode, isManualDistrictSelected, activeDistrict, userLocation])
 
   useEffect(() => {
     loadWeather()
@@ -384,14 +465,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Is active location in NER?
+  // All districts in `regions` are curated NER/hill districts, so a manual
+  // selection is always treated as NER regardless of where the user's
+  // browser GPS physically is.
   const isNER = useMemo(() => {
     if (isDemoMode) return true
+    if (isManualDistrictSelected) return true
     return userLocation.isNER ?? checkIsNER(userLocation.state, userLocation.district)
-  }, [isDemoMode, userLocation])
+  }, [isDemoMode, isManualDistrictSelected, userLocation])
 
   // Check if detected state/district is known mountainous landslide terrain
   const isMountainousRelief = useMemo(() => {
     if (isDemoMode) return true
+    if (isManualDistrictSelected) return true // every curated region is hill/mountain terrain
     const state = (userLocation.state || '').toLowerCase()
     const district = (userLocation.district || '').toLowerCase()
     const city = (userLocation.city || '').toLowerCase()
@@ -415,13 +501,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     ]
 
     return hillStates.some((s) => state.includes(s) || district.includes(s) || city.includes(s))
-  }, [isDemoMode, userLocation])
+  }, [isDemoMode, isManualDistrictSelected, userLocation])
 
   // Check if historical landslide events exist for the current monitored location
   const hasHistoricalEventsForLocation = useMemo(() => {
     if (isDemoMode) return true
-    const locName = (userLocation.district || userLocation.city || '').toLowerCase()
-    const locState = (userLocation.state || '').toLowerCase()
+    const locName = isManualDistrictSelected
+      ? activeDistrict.toLowerCase()
+      : (userLocation.district || userLocation.city || '').toLowerCase()
+    const locState = isManualDistrictSelected
+      ? (getRegionMeta(activeDistrict)?.state || '').toLowerCase()
+      : (userLocation.state || '').toLowerCase()
 
     return HISTORICAL_LANDSLIDES.some(
       (ev) =>
@@ -429,7 +519,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         locName.includes(ev.district.toLowerCase()) ||
         ev.state.toLowerCase().includes(locState)
     )
-  }, [isDemoMode, userLocation])
+  }, [isDemoMode, isManualDistrictSelected, activeDistrict, userLocation])
 
   // Calculate honest risk level & alerts based on real physics & location
   const { liveRiskScore, liveRiskLevel, highRiskZonesCount, systemStatusLabel } =
@@ -458,7 +548,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Mountainous / NER region in Live Mode
+      // Mountainous / NER region in Live Mode (either GPS-detected or a
+      // manually selected district — both flow through the same weather
+      // pipeline now, so this naturally reflects the selected district)
       const rainVal = weather.forecast24hRain || 0
       let computedScore = Math.min(88, Math.max(14, Math.round(rainVal * 0.65 + 18)))
       let level: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL' = 'LOW'
@@ -613,6 +705,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         activeDistrict,
         setActiveDistrict,
         activeRegion,
+        isManualDistrictSelected,
+        useMyCurrentLocation,
 
         weather,
         weatherLoading,

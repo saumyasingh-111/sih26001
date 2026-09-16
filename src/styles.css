@@ -579,3 +579,7 @@ button { border: 0; cursor: pointer; }
   border-color: #7f1d1d !important;
   color: #ffffff !important;
 }
+
+.leaflet-container {
+  isolation: isolate;
+}

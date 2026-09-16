@@ -100,7 +100,15 @@ export function TopNav({
 }: TopNavProps) {
   const [moreOpen, setMoreOpen] = useState(false)
   const moreMenuRef = useRef<HTMLDivElement>(null)
-  const { dataMode, setMode, isDemoMode, userLocation, isNER, activeLocationName } = useDataContext()
+  const {
+    dataMode,
+    setMode,
+    isDemoMode,
+    userLocation,
+    isNER,
+    activeLocationName,
+    isManualDistrictSelected,
+  } = useDataContext()
 
   // Clean outside-click listener for "More" dropdown
   useEffect(() => {
@@ -120,6 +128,13 @@ export function TopNav({
       document.removeEventListener('touchstart', handleClickOutside)
     }
   }, [moreOpen])
+
+  // Short label for the compact status badge: the selected district name
+  // when manually chosen, otherwise the first segment of the GPS display
+  // name (e.g. "Kanpur, Uttar Pradesh" -> "Kanpur").
+  const liveBadgeLabel = isManualDistrictSelected
+    ? activeLocationName.split(',')[0]
+    : userLocation.city || activeLocationName.split(',')[0] || 'Kanpur'
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 font-sans text-slate-800 shadow-2xs">
@@ -248,7 +263,7 @@ export function TopNav({
               }`}
             />
             <span className="font-semibold text-slate-800 max-w-[150px] truncate">
-              {isDemoMode ? 'DEMO | Churachandpur' : `LIVE | ${userLocation.city || 'Kanpur'}`}
+              {isDemoMode ? 'DEMO | Churachandpur' : `${isManualDistrictSelected ? 'SELECTED' : 'LIVE'} | ${liveBadgeLabel}`}
             </span>
           </div>
 
@@ -316,8 +331,8 @@ export function TopNav({
         </div>
       </div>
 
-      {/* Outside NER Notice Banner for Live Mode */}
-      {!isDemoMode && !isNER && (
+      {/* Outside NER Notice Banner for Live Mode (only when using real GPS, not a manual selection) */}
+      {!isDemoMode && !isManualDistrictSelected && !isNER && (
         <div className="bg-slate-50 text-slate-700 border-t border-slate-200 px-4 py-1.5 text-xs flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 truncate">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />

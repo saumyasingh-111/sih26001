@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import './CommandCenter.css'
 import {
   Activity,
   AlertCircle,
@@ -168,13 +169,13 @@ export function CommandCenterOperations({
   }
 
   return (
-    <div className="command-center-page max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-4 text-slate-800 font-sans">
+    <div className="sentinel-command-center space-y-4 text-slate-800 font-sans overflow-x-hidden">
       {/* ============================================================ */}
       {/* 1. Visible Page Heading & Export Actions                    */}
       {/* ============================================================ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500">
             <span>OPERATIONAL INTELLIGENCE</span>
             <span className="text-slate-300">/</span>
             <span>NATIONAL DISASTER MANAGEMENT</span>
@@ -333,7 +334,7 @@ export function CommandCenterOperations({
       {/* ============================================================ */}
       {/* 4. Top Key Operational Metrics (Honest, restrained)         */}
       {/* ============================================================ */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="command-metrics-grid">
         {/* Metric 1: Active Risk Alerts */}
         <div className="p-3.5 rounded-lg bg-white border border-slate-200 shadow-2xs space-y-1">
           <div className="text-[10px] font-mono text-slate-500 uppercase">Active Risk Alerts</div>
@@ -422,7 +423,7 @@ export function CommandCenterOperations({
         </div>
 
         {/* Metric 5: Model Confidence */}
-        <div className="p-3.5 rounded-lg bg-white border border-slate-200 shadow-2xs space-y-1 col-span-2 sm:col-span-1">
+        <div className="p-3.5 rounded-lg bg-white border border-slate-200 shadow-2xs space-y-1 command-metric-span-wide">
           <div className="text-[10px] font-mono text-slate-500 uppercase">Model Confidence</div>
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold tracking-tight text-slate-900 font-mono">94.2%</span>
@@ -437,9 +438,9 @@ export function CommandCenterOperations({
       {/* ============================================================ */}
       {/* 5. Main 2-Column Split: Leaflet Map + Location Intelligence  */}
       {/* ============================================================ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <div className="command-split-grid">
         {/* LEFT: Leaflet Map with GPS Auto-Centering (7 Columns) */}
-        <div className="lg:col-span-7 flex flex-col rounded-lg bg-white border border-slate-200 shadow-2xs overflow-hidden">
+        <div className="min-w-0 flex flex-col rounded-lg bg-white border border-slate-200 shadow-2xs overflow-hidden">
           {/* Map Toolbar */}
           <div className="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -562,7 +563,7 @@ export function CommandCenterOperations({
           )}
 
           {/* Leaflet Map Surface */}
-          <div className="relative h-[480px] bg-slate-100">
+          <div className="command-map-surface">
             <CommandMapLeaflet
               activeCoords={activeLocationCoords}
               locationName={activeLocationName}
@@ -581,7 +582,7 @@ export function CommandCenterOperations({
             />
 
             {/* Floating Map Controls */}
-            <div className="absolute top-3 right-3 z-400 flex flex-col gap-1">
+            <div className="absolute top-3 right-3 z-20 flex flex-col gap-1">
               <button
                 onClick={() => go('gis')}
                 className="w-7 h-7 rounded bg-white border border-slate-200 shadow-md flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-50 cursor-pointer"
@@ -621,23 +622,23 @@ export function CommandCenterOperations({
         </div>
 
         {/* RIGHT: Location Intelligence & Early Warning Panel (5 Columns) */}
-        <div className="lg:col-span-5 rounded-lg bg-white border border-slate-200 shadow-2xs p-4 space-y-4">
+        <div className="min-w-0 rounded-lg bg-white border border-slate-200 shadow-2xs p-4 space-y-4">
           {/* Header */}
-          <div className="flex items-start justify-between pb-3 border-b border-slate-100">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-slate-100">
+            <div className="min-w-0">
               <div className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500">
                 MONITORED SECTOR INTELLIGENCE
               </div>
-              <h2 className="text-lg font-bold text-slate-900 mt-0.5">
+              <h2 className="text-lg font-bold text-slate-900 mt-0.5 break-words">
                 {activeLocationName}
               </h2>
-              <div className="text-xs text-slate-500 mt-0.5">
+              <div className="text-xs text-slate-500 mt-0.5 break-words">
                 Elevation: {weather.elevation}m · Coordinates: {activeLocationCoords.lat}°N, {activeLocationCoords.lon}°E
               </div>
             </div>
 
             <span
-              className={`px-2.5 py-1 rounded text-xs font-mono font-bold ${
+              className={`px-2.5 py-1 rounded text-xs font-mono font-bold shrink-0 ${
                 activeScore >= 76
                   ? 'bg-rose-100 text-rose-800 border border-rose-200'
                   : activeScore >= 51
@@ -910,10 +911,10 @@ export function CommandCenterOperations({
       {/* 7. Human-in-the-Loop Review Modal                            */}
       {/* ============================================================ */}
       {reviewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-2xl w-full overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-              <div>
+        <div className="command-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs">
+          <div className="command-modal-panel bg-white rounded-lg border border-slate-200 shadow-xl max-w-2xl w-full overflow-hidden flex flex-col">
+            <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-200 flex items-start sm:items-center justify-between gap-3 bg-slate-50">
+              <div className="min-w-0">
                 <h3 className="text-sm font-bold text-slate-900">
                   Human-in-the-Loop: Preventive Action Authorization
                 </h3>
@@ -923,13 +924,13 @@ export function CommandCenterOperations({
               </div>
               <button
                 onClick={() => setReviewModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto text-xs">
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto text-xs">
               {actionSuccessMsg && (
                 <div className="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-600" />
@@ -990,7 +991,7 @@ export function CommandCenterOperations({
 
                     {/* Action Buttons */}
                     {action.status === 'PENDING' && (
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
                         <button
                           onClick={() => {
                             approveAction(action.id)
@@ -1047,7 +1048,7 @@ export function CommandCenterOperations({
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => {
                         if (!rejectionReason.trim()) {
