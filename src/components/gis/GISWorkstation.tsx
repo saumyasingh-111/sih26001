@@ -292,7 +292,7 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
         heatLayerRef.current = null
       }
 
-      if (heatmapEnabled && (isDemoMode || isNER)) {
+      if (heatmapEnabled) {
         const heatmapPoints = generateLandslideHeatmapData({
           isDemoMode,
           activeScore: score,
@@ -314,6 +314,130 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
           console.error('Heatmap instantiation error:', e)
         }
       }
+    }
+
+    // Shared severity/risk threshold derived from the "Risk Severity" filter,
+    // applied consistently across every district- and event-level layer below.
+    const riskThreshold =
+      riskFilter === 'Critical only' ? 76 : riskFilter === 'High and above' ? 51 : riskFilter === 'Moderate and above' ? 31 : 0
+    const severityScore: Record<string, number> = { CRITICAL: 90, HIGH: 65, MODERATE: 40, LOW: 15 }
+    const getRegionCoords = (r: Region) =>
+      DISTRICT_COORDINATES[r.name] || { lat: 26.2 + (r.y - 50) * 0.12, lon: 92.94 + (r.x - 50) * 0.16 }
+
+    // 1b. Historical Landslides (ISRO) — real NASA GLC / GSI event markers.
+    // Respects the layer's own opacity slider plus all three Spatial Filters:
+    // Date Baseline (only events on/before the selected date), Elevation
+    // Cutoff (only events at/above the selected elevation), and Risk Severity
+    // (mapped from each event's recorded severity).
+    if (layers['Historical Landslides (ISRO)'] > 0) {
+      const opacity = layers['Historical Landslides (ISRO)'] / 100
+      HISTORICAL_LANDSLIDES.filter(
+        (event) =>
+          event.date <= dateRange &&
+          event.elevationM >= elevationThreshold &&
+          severityScore[event.severity] >= riskThreshold
+      ).forEach((event) => {
+        const color =
+          event.severity === 'CRITICAL' ? '#b91c1c' : event.severity === 'HIGH' ? '#ea580c' : event.severity === 'MODERATE' ? '#ca8a04' : '#16a34a'
+        const marker = L.circleMarker(event.coordinates, {
+          radius: 7,
+          color,
+          fillColor: color,
+          fillOpacity: opacity * 0.85,
+          weight: 2,
+          opacity,
+        })
+        marker.bindTooltip(
+          `<div style="font-family:inherit;font-size:11px;">
+            <strong style="color:${color};">⛰ ${event.location}</strong><br/>
+            Date: ${event.date} · Elevation: ${event.elevationM}m<br/>
+            Severity: <b>${event.severity}</b> · 24h rainfall: ${event.rainfall24hMm}mm<br/>
+            ${event.infrastructureImpact}<br/>
+            Source: ${event.source}
+          </div>`,
+          { direction: 'top' }
+        )
+        marker.addTo(overlayGroup)
+      })
+    }
+
+    // 1c. Forecast Rainfall (IMD) — per-district rainfall circles, scaled by
+    // each region's forecast rainfall figure and filtered by Risk Severity.
+    if (layers['Forecast Rainfall (IMD)'] > 0) {
+      const opacity = layers['Forecast Rainfall (IMD)'] / 100
+      regions
+        .filter((r) => r.risk >= riskThreshold)
+        .forEach((r) => {
+          const coords = getRegionCoords(r)
+          const rainMm = parseInt(r.rain) || 0
+          const circle = L.circle([coords.lat, coords.lon], {
+            radius: 9000 + rainMm * 120,
+            color: '#2563eb',
+            fillColor: '#3b82f6',
+            fillOpacity: opacity * 0.22,
+            weight: 1.5,
+            dashArray: '4,4',
+          })
+          circle.bindTooltip(
+            `<div style="font-family:inherit;font-size:11px;">
+              <strong style="color:#1d4ed8;">🌧 ${r.name}, ${r.state}</strong><br/>
+              IMD Forecast Rainfall: <b>${r.rain}</b> (24h)
+            </div>`,
+            { direction: 'top' }
+          )
+          circle.addTo(overlayGroup)
+        })
+    }
+
+    // 1d. Soil Saturation Index — per-district circles scaled by soil score.
+    if (layers['Soil Saturation Index'] > 0) {
+      const opacity = layers['Soil Saturation Index'] / 100
+      regions
+        .filter((r) => r.risk >= riskThreshold)
+        .forEach((r) => {
+          const coords = getRegionCoords(r)
+          const circle = L.circle([coords.lat, coords.lon], {
+            radius: 6000 + r.soil * 250,
+            color: '#92400e',
+            fillColor: '#d97706',
+            fillOpacity: opacity * 0.18,
+            weight: 1.5,
+          })
+          circle.bindTooltip(
+            `<div style="font-family:inherit;font-size:11px;">
+              <strong style="color:#92400e;">💧 ${r.name}, ${r.state}</strong><br/>
+              Soil Saturation Index: <b>${r.soil}%</b>
+            </div>`,
+            { direction: 'top' }
+          )
+          circle.addTo(overlayGroup)
+        })
+    }
+
+    // 1e. Slope Vulnerability — per-district circles scaled by slope score.
+    if (layers['Slope Vulnerability'] > 0) {
+      const opacity = layers['Slope Vulnerability'] / 100
+      regions
+        .filter((r) => r.risk >= riskThreshold)
+        .forEach((r) => {
+          const coords = getRegionCoords(r)
+          const circle = L.circle([coords.lat, coords.lon], {
+            radius: 6000 + r.slope * 250,
+            color: '#701a75',
+            fillColor: '#a21caf',
+            fillOpacity: opacity * 0.16,
+            weight: 1.5,
+            dashArray: '2,6',
+          })
+          circle.bindTooltip(
+            `<div style="font-family:inherit;font-size:11px;">
+              <strong style="color:#701a75;">⛰ ${r.name}, ${r.state}</strong><br/>
+              Slope Vulnerability Index: <b>${r.slope}%</b>
+            </div>`,
+            { direction: 'top' }
+          )
+          circle.addTo(overlayGroup)
+        })
     }
 
     // 2. Buffer Radius Selector Tool
@@ -452,6 +576,9 @@ export function GISWorkstation({ region, score, incident, notify }: GISWorkstati
     heatmapEnabled,
     heatmapRadius,
     heatmapIntensity,
+    dateRange,
+    elevationThreshold,
+    riskFilter,
   ])
 
   // Toggle Accordion Category

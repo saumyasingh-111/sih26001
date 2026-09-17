@@ -9,6 +9,7 @@ export interface HistoricalLandslideEvent {
   district: string
   state: string
   coordinates: [number, number] // [lat, lon]
+  elevationM: number
   severity: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
   trigger: 'Continuous Monsoon Rain' | 'Cloudburst Deluge' | 'Tropical Depression' | 'Slope Cut Excavation + Rain'
   rainfall24hMm: number
@@ -25,6 +26,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Churachandpur',
     state: 'Manipur',
     coordinates: [24.352, 93.688],
+    elevationM: 900,
     severity: 'CRITICAL',
     trigger: 'Continuous Monsoon Rain',
     rainfall24hMm: 164.2,
@@ -39,6 +41,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'East Khasi Hills',
     state: 'Meghalaya',
     coordinates: [25.285, 91.732],
+    elevationM: 1420,
     severity: 'CRITICAL',
     trigger: 'Cloudburst Deluge',
     rainfall24hMm: 312.0,
@@ -53,6 +56,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Dima Hasao',
     state: 'Assam',
     coordinates: [25.176, 93.024],
+    elevationM: 680,
     severity: 'CRITICAL',
     trigger: 'Continuous Monsoon Rain',
     rainfall24hMm: 245.5,
@@ -67,6 +71,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Gangtok',
     state: 'Sikkim',
     coordinates: [27.602, 88.645],
+    elevationM: 2700,
     severity: 'CRITICAL',
     trigger: 'Cloudburst Deluge',
     rainfall24hMm: 198.0,
@@ -81,6 +86,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Kohima',
     state: 'Nagaland',
     coordinates: [25.682, 94.095],
+    elevationM: 1350,
     severity: 'HIGH',
     trigger: 'Continuous Monsoon Rain',
     rainfall24hMm: 118.4,
@@ -95,6 +101,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Upper Siang',
     state: 'Arunachal Pradesh',
     coordinates: [28.988, 94.902],
+    elevationM: 550,
     severity: 'HIGH',
     trigger: 'Continuous Monsoon Rain',
     rainfall24hMm: 142.8,
@@ -109,6 +116,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Aizawl',
     state: 'Mizoram',
     coordinates: [23.364, 93.332],
+    elevationM: 850,
     severity: 'MODERATE',
     trigger: 'Tropical Depression',
     rainfall24hMm: 92.6,
@@ -123,6 +131,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'Tawang',
     state: 'Arunachal Pradesh',
     coordinates: [27.502, 92.098],
+    elevationM: 4100,
     severity: 'HIGH',
     trigger: 'Slope Cut Excavation + Rain',
     rainfall24hMm: 86.4,
@@ -137,6 +146,7 @@ export const HISTORICAL_LANDSLIDES: HistoricalLandslideEvent[] = [
     district: 'West Garo Hills',
     state: 'Meghalaya',
     coordinates: [25.485, 90.198],
+    elevationM: 450,
     severity: 'MODERATE',
     trigger: 'Continuous Monsoon Rain',
     rainfall24hMm: 178.0,

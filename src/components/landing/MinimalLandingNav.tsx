@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ArrowRight, Mountain } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { RouteName } from '../navbar/TopNav'
 
 interface MinimalLandingNavProps {
@@ -31,9 +31,11 @@ export function MinimalLandingNav({ go }: MinimalLandingNavProps) {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-2.5 text-left group cursor-pointer"
         >
-          <span className="w-7 h-7 rounded-md bg-stone-900 border border-stone-800 flex items-center justify-center text-stone-300 group-hover:text-white transition">
-            <Mountain size={15} />
-          </span>
+          <img
+            src="/./public/assets/favicon.svg"
+            alt="Sentinel NER"
+            className="w-7 h-7 flex-shrink-0"
+          />
           <span className="font-editorial text-lg tracking-wider font-semibold text-stone-100">
             SENTINEL <span className="font-light italic text-stone-300">NER</span>
           </span>

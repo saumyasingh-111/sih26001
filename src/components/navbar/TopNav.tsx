@@ -12,7 +12,6 @@ import {
   Globe2,
   Layers3,
   Menu,
-  Mountain,
   Radio,
   Route,
   Search,
@@ -73,9 +72,11 @@ export function Brand({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       aria-label="Sentinel NER Home"
     >
-      <span className="w-8 h-8 rounded-md grid place-items-center bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold shadow-xs">
-        <Mountain size={17} />
-      </span>
+      <img
+        src="./public/assets/favicon.svg"
+        alt="Sentinel NER"
+        className="w-8 h-8 flex-shrink-0"
+      />
       <div className="flex flex-col">
         <span className="text-xs sm:text-sm tracking-wider font-extrabold text-slate-900 font-mono leading-none">
           SENTINEL <span className="text-emerald-700">NER</span>
