@@ -1,0 +1,133 @@
+/* ============================================================
+   Command Center — dedicated stylesheet
+   Co-located with CommandCenterOperations.tsx and imported only
+   by that component, so it can't collide with global styles.css /
+   functional.css / interaction.css the way the old shared
+   ".command-center-page" rules used to.
+
+   Mobile-first: base rules below target phones; each @media block
+   widens the layout for larger viewports. Breakpoints used:
+     400px  -> large phones
+     640px  -> small tablets / landscape phones
+     768px  -> tablets
+     1024px -> laptops / desktop
+   ============================================================ */
+
+/* Relies on the shared `command-enter` keyframe defined in the
+   global styles.css (also used by other pages), so it is not
+   redefined here to avoid duplicate keyframe declarations. */
+
+.sentinel-command-center {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 12px 36px;
+  color: var(--ink);
+  animation: command-enter .35s ease both;
+}
+
+/* Force the light theme for this page regardless of any dark
+   ancestor styling (mirrors the old global .app-shell override,
+   now scoped locally instead of living in a shared selector list). */
+.app-shell .sentinel-command-center {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* ---- Top KPI metrics row ----------------------------------- */
+/* 1 col on tiny phones -> 2 -> 3 -> 5 on desktop */
+.sentinel-command-center .command-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* The "Model Confidence" card spans the full row on the 2-column
+   layout so it doesn't look orphaned, then reverts to a normal
+   single cell once there's a 3rd/5th column to fill. */
+.sentinel-command-center .command-metric-span-wide {
+  grid-column: span 1;
+}
+
+/* ---- Map + intelligence panel split ------------------------- */
+/* Stacked on mobile/tablet, side-by-side on desktop */
+.sentinel-command-center .command-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ---- Leaflet map surface -------------------------------------
+   Height scales with viewport instead of one fixed px value, so
+   the map never eats the whole screen on a phone or looks tiny
+   on a desktop. */
+.sentinel-command-center .command-map-surface {
+  position: relative;
+  height: 240px;
+  background: #f1f5f9;
+  isolation: isolate;
+}
+
+/* ---- Human-in-the-loop authorization modal -------------------- */
+.sentinel-command-center .command-modal-overlay {
+  padding: 8px;
+}
+.sentinel-command-center .command-modal-panel {
+  max-height: 95vh;
+}
+
+/* ============================================================
+   Breakpoints (mobile-first, min-width)
+   ============================================================ */
+
+@media (min-width: 400px) {
+  .sentinel-command-center .command-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sentinel-command-center .command-metric-span-wide {
+    grid-column: span 2;
+  }
+  .sentinel-command-center .command-map-surface {
+    height: 300px;
+  }
+}
+
+@media (min-width: 640px) {
+  .sentinel-command-center {
+    padding: 20px 24px 44px;
+  }
+  .sentinel-command-center .command-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .sentinel-command-center .command-metric-span-wide {
+    grid-column: span 1;
+  }
+  .sentinel-command-center .command-map-surface {
+    height: 360px;
+  }
+  .sentinel-command-center .command-modal-overlay {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .sentinel-command-center .command-map-surface {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sentinel-command-center {
+    padding: 28px 28px 52px;
+  }
+  .sentinel-command-center .command-split-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+  .sentinel-command-center .command-metrics-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .sentinel-command-center .command-map-surface {
+    height: 480px;
+  }
+}
