@@ -289,7 +289,9 @@ export const DEMO_INCIDENT: Incident = {
 }
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [dataMode, setDataMode] = useState<DataMode>('live')
+  const [dataMode, setDataMode] = useState<DataMode>(() => {
+    return (localStorage.getItem('sentinel_data_mode') as DataMode) || 'live'
+  })
   const [activeDistrict, setActiveDistrictState] = useState<string>('Churachandpur')
 
   // NEW: tracks whether the user has explicitly picked a district from a
@@ -450,10 +452,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const setMode = (mode: DataMode) => {
     setDataMode(mode)
+    localStorage.setItem('sentinel_data_mode', mode)
+
+    if (mode === 'demo') {
+      // Switch immediately to Churachandpur crisis scenario
+      setActiveDistrictState('Churachandpur')
+      setIsManualDistrictSelected(false)
+      setDemoAlerts(initialAlerts)
+      setDemoIncident(DEMO_INCIDENT)
+      setDemoReports(initialReports)
+      setDemoWarningActions(INITIAL_WARNING_ACTIONS)
+    } else {
+      // Clear demo overlays & restore live coordinates/district
+      setLiveAlerts([])
+      setLiveIncident(null)
+      setLiveReports([])
+      setLiveWarningActions(LIVE_BASELINE_WARNING_ACTIONS)
+      if (userLocation.isDetected && userLocation.district) {
+        setActiveDistrictState(userLocation.district)
+        setIsManualDistrictSelected(false)
+      }
+    }
   }
 
   const toggleMode = () => {
-    setDataMode((prev) => (prev === 'live' ? 'demo' : 'live'))
+    const next = dataMode === 'live' ? 'demo' : 'live'
+    setMode(next)
   }
 
   const resetDemoState = () => {
@@ -462,6 +486,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setDemoReports(initialReports)
     setDemoWarningActions(INITIAL_WARNING_ACTIONS)
     setDataMode('live')
+    localStorage.setItem('sentinel_data_mode', 'live')
   }
 
   // Is active location in NER?

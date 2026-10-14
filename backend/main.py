@@ -1,17 +1,45 @@
 from datetime import datetime, timezone
 from typing import Any
+import os
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="SENTINEL NER Demo API", version="0.1.0")
+from backend.database import init_db
+from backend.routes_auth import router as auth_router
+from backend.routes_citizen import router as citizen_router
+from backend.routes_field import router as field_router
+from backend.routes_officer import router as officer_router
+from backend.routes_rescue import router as rescue_router
+
+# Initialize database on startup
+init_db()
+
+app = FastAPI(
+    title="Sentinel NER API",
+    description="Multi-Interface Role-Based Disaster Management & Early Warning Platform",
+    version="1.0.0",
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_origins=[
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:4173",
+        "http://localhost:4173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include role-specific routers
+app.include_router(auth_router)
+app.include_router(citizen_router)
+app.include_router(field_router)
+app.include_router(officer_router)
+app.include_router(rescue_router)
 
 REGION = {
     "name": "Churachandpur",
@@ -25,7 +53,7 @@ REGION = {
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
-    return {"status": "operational", "mode": "demo"}
+    return {"status": "operational", "system": "Sentinel NER Multi-Interface Platform", "mode": "demo_and_live"}
 
 
 @app.get("/api/risk/current")

@@ -34,7 +34,7 @@ import { generateLandslideHeatmapData, HEATMAP_GRADIENT } from '../../utils/heat
 interface GISWorkstationProps {
   region: Region
   score: number
-  incident: Incident
+  incident: Incident | null
   notify?: (message: string, tone?: 'success' | 'error') => void
 }
 

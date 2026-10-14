@@ -7,7 +7,7 @@ import { SignalsToWarningSection } from './sections/SignalsToWarningSection'
 import { ReadyResolutionSection } from './sections/ReadyResolutionSection'
 
 interface CinematicLandingProps {
-  go: (r: RouteName) => void
+  go: (r: string) => void
 }
 
 export function CinematicLanding({ go }: CinematicLandingProps) {
